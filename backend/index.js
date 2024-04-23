@@ -81,6 +81,45 @@ const connection = mysql.createConnection({
     );
   
   })
+
+  app.all('/products', (req, res) => {
+    if (req.method === 'GET') {
+      connection.query('SELECT * FROM produits', (err, results) => {
+        if (err) {
+          res.status(500).send('Erreur lors de la récupération des produits');
+        } else {
+          res.status(200).json(results);
+        }
+      });
+    } else if (req.method === 'POST') {
+      const { product_name, product_description,price,category,imagePath } = req.body;
+      connection.query(
+        'INSERT INTO produit (Libellé, Description,Images,Prix,Catégorie) VALUES (?, ?, ?, ?, ?)',
+        [product_name, product_description,imagePath,price,category],
+        (err, results) => {
+          if (err) {
+            console.log(err);
+            res.status(500).send('Erreur lors de l\'ajout du produit');
+          } else {
+            res.status(200).send('Produit ajouté avec succès');
+          }
+        }
+      );
+    } else if (req.method === 'DELETE') {
+      const { id } = req.body;
+      connection.query(
+        'DELETE FROM produits WHERE ID = ?',
+        [id],
+        (err, results) => {
+          if (err) {
+            res.status(500).send('Erreur lors de la suppression du produit');
+          } else {
+            res.status(200).send('Produit supprimé avec succès');
+          }
+        }
+      );
+    }
+  })
   app.listen(5000, () => {
     console.log('Serveur démarré sur http://localhost:5000');
   });

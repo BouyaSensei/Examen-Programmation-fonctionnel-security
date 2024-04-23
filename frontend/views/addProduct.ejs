@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store</title>
+    <!-- Liens CDN pour Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Liens CDN pour Materialize -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <style>
+        /* Ajouter des styles personnalisés ici pour résoudre les conflits */
+    .container { max-width: 800px; }
+    .input-field { margin-top: 20px; }
+    </style>
+
+        <%- include('./components/navbar') %>
+
+
+
+</head>
+<body>
+<div class="container mt-4">
+  <h2>Ajouter un produit</h2>
+  <form action="products" method="post" enctype="multipart/form-data">
+
+    <!-- Nom du produit -->
+    <div class="input-field">
+      <input name="product_name" id="product_name" type="text" class="validate form-control" required>
+      <label for="product_name">Nom</label>
+    </div>
+
+    <!-- Description du produit -->
+    <div class="input-field">
+      <textarea name="product_description" id="product_description" class="materialize-textarea form-control" required></textarea>
+      <label for="product_description">Description</label>
+    </div>
+
+     Ajouter des images 
+    <div class="input-field">
+      <div class="file-field input-field">
+        <div class="btn blue">
+          <span>Ajouter des images</span>
+          <input type="file" name="image" multiple accept="image/*">
+        </div>
+        <div class="file-path-wrapper">
+          <input class="file-path validate form-control" type="text" placeholder="Ajouter une ou plusieurs images">
+        </div>
+      </div>
+    </div>
+
+    <!-- Prix du produit -->
+    <div class="input-field">
+      <input name="price" id="product_price" type="number" class="validate form-control" required>
+      <label for="product_price">Prix (€)</label>
+    </div>
+
+    <!-- Catégorie du produit -->
+    <div class="input-field">
+      <input name="category" type="text" id="product_category" class="validate form-control" required>
+      <label for="product_category">Catégorie</label>
+    </div>
+    <input type='hidden', name='_csrf', value= <%= csrfToken %>>
+    <!-- Bouton de soumission -->
+    <button class="btn waves-effect waves-light" type="submit" name="action">
+      <i class="material-icons right">Ajouter le produit</i>
+    </button>
+   
+  </form>
+</div>
+
+    <!-- Scripts nécessaires pour Bootstrap et Materialize -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>    
