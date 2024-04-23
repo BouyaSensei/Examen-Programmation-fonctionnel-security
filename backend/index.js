@@ -84,7 +84,7 @@ const connection = mysql.createConnection({
 
   app.all('/products', (req, res) => {
     if (req.method === 'GET') {
-      connection.query('SELECT * FROM produits', (err, results) => {
+      connection.query('SELECT * FROM produit', (err, results) => {
         if (err) {
           res.status(500).send('Erreur lors de la récupération des produits');
         } else {
@@ -108,7 +108,7 @@ const connection = mysql.createConnection({
     } else if (req.method === 'DELETE') {
       const { id } = req.body;
       connection.query(
-        'DELETE FROM produits WHERE ID = ?',
+        'DELETE FROM produit WHERE ID = ?',
         [id],
         (err, results) => {
           if (err) {
