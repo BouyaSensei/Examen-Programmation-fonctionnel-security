@@ -22,7 +22,7 @@ app.use(session({
     secret: '94+@&9miowi(chcx+xr%v)wa4p+yl20s$o-2)8h!3d+y0d(1!$',
     resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: 30000 }, // Cookie expirera après 30 secondes
+    cookie: {maxAge: 30000}, // Cookie expirera après 30 secondes
 }));
 
 
@@ -74,63 +74,7 @@ app.get("/register", (req, res) => {
 // Route pour enregistrer un utilisateur
 app.post("/register", async (req, res) => {
 
-  //je récupère le token csrf dans le cookie
-  const csrfToken = req.cookies.csrfToken;
-  //je vérifie que le token csrf est valide
-
-  //console.log(tokens.verify(csrfToken,req.body._csrf));
-  if (csrfToken !== req.body._csrf) {
-    res.status(403).send("Jeton CSRF invalide");
-    return;
-  }
-
-  const { name, password } = req.body;
-
-  //j'envoi les données de l'utilisateur à l'API server
-
-  await axios
-    .post(
-      "http://localhost:5000/register",
-      { name, password },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    )
-    .then((response) => {
-      //res.send('Utilisateur enregistré avec succès');
-
-      return res.redirect("/login");
-    })
-    .catch((err) => {
-      res.status(500).send("Erreur lors de l'enregistrement de l'utilisateur");
-    });
-});
-
-//  partie login
-app.all("/login", async (req, res) => {
-  if (req.method === "GET") {
-    const secret = tokens.secretSync();
-    const token = tokens.create(secret);
-    res.cookie("toast", { type: "", message: "" }, { httpOnly: true });
-    console.log(req.cookies);
-    //console.log('oki');
-    //declaration des toast pou affichage de message selon circonstance 
-    //req.session.toast  ? req.session.toast : { type: "", message: "" }
-   // req.session.toast = { type: "", message: "" };
-
-    res.cookie("csrfToken", token, { httpOnly: true });
-    
-    const info = {
-        csrfToken: token,
-        toast : req.cookies.toast
-    }
-    res.render("login.ejs", { info });
-    //req.session.toast = null; // Réinitialiser le toast après l'affichage
-
-  } else if (req.method === "POST") {
-
+    //je récupère le token csrf dans le cookie
     const csrfToken = req.cookies.csrfToken;
     //je vérifie que le token csrf est valide
 
@@ -144,138 +88,156 @@ app.all("/login", async (req, res) => {
 
     //j'envoi les données de l'utilisateur à l'API server
 
-    axios
-      .post(
-        "http://localhost:5000/login",
-        { name, password },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
-      .then((response) => {
-        //res.send('Utilisateur enregistré avec succès');
-        const token = jwt.sign({ name }, "secret");
-        res.cookie("jwt", token, { httpOnly: true });
-        
-        return res.redirect("/dashboard");
-      })
-      .catch((err) => {
-        req.cookies.toast.type = "error";
-        req.cookies.toast.message = "Erreur  de connexion  utilisateur ! Veuillez réessayer ! ";
-        console.log(req.cookies.toast);
+    await axios
+        .post(
+            "http://localhost:5000/register",
+            {name, password},
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        )
+        .then((response) => {
+            //res.send('Utilisateur enregistré avec succès');
+
+            return res.redirect("/login");
+        })
+        .catch((err) => {
+            res.status(500).send("Erreur lors de l'enregistrement de l'utilisateur");
+        });
+});
+
+//  partie login
+app.all("/login", async (req, res) => {
+    if (req.method === "GET") {
+        const secret = tokens.secretSync();
+        const token = tokens.create(secret);
+        res.cookie("toast", {type: "", message: ""}, {httpOnly: true});
+        console.log(req.cookies);
+        //console.log('oki');
+        //declaration des toast pou affichage de message selon circonstance
+        //req.session.toast  ? req.session.toast : { type: "", message: "" }
+        // req.session.toast = { type: "", message: "" };
+
+        res.cookie("csrfToken", token, {httpOnly: true});
+
         const info = {
-            csrfToken: req.cookies.csrfToken,
-            toast : req.cookies.toast
+            csrfToken: token,
+            toast: req.cookies.toast
         }
         res.render("login.ejs", {info});
-       // res.status(500).send("Erreur  de connexion  utilisateur");
-      });
-  }
-});
+        //req.session.toast = null; // Réinitialiser le toast après l'affichage
 
-app.get("/logout", (req, res) => {
-  res.clearCookie("jwt");
-  res.redirect("/");
-});
-//  partie dashboard
-app.get("/dashboard", (req, res) => {
- 
-  if( req.cookies.jwt){
-    
-    req.session.toast.message = "Connexion réussi ! Bienvenue sur votre dashboard ! ";
-    req.session.toast.type = "success";
-    res.render("dashboard.ejs", { token: req.cookies.jwt, toast : req.session.toast });
-    req.session.toast = null;
-  }else{
-    req.session.toast = "Erreur d'authentification ! ";
-    req.session.toast.type = "error";
-    res.redirect("/login");
-   
-  }
-  //req.cookies.jwt ? res.render("dashboard.ejs", { token: req.cookies.jwt, toast : req.session.toast }): res.redirect("/");
+    } else if (req.method === "POST") {
 
-});
-
-// Route handler pour toutes les requêtes à "/products"
-app.all("/products", upload.single("image"), (req, res) => {
-
-
-  if (req.method === "GET") {
-    axios
-      .get("http://localhost:5000/products")
-      .then((response) => {
-        res.status(200).json(response.data);
-      })
-      .catch((err) => {
-        res.status(500).send("Erreur lors de la récupération des produits");
-      });
-
-  } else if (req.method === "POST") {
-    const { product_name, product_description,price, category } =
-      req.body;
-     
-    const imagePath = req.file.path; // Obtenez le chemin de l'image téléchargée
-    //return console.log(imagePath);
-    //je récupère le token csrf dans le cookie
-    const csrfToken = req.cookies.csrfToken;
-    //je vérifie que le token csrf est valide
-
-
-    // Gère les requêtes GET à "/products"
-    if (req.method === "GET") {
-        // Demande à l'API les produits et envoie les données obtenues en réponse
-        axios.get("http://localhost:5000/products")
-            .then((response) => {
-                res.status(200).json(response.data);
-            })
-            .catch((err) => { // Gère les erreurs lors de la récupération des produits
-                res.status(500).send("Erreur lors de la récupération des produits");
-            });
-    }
-    // Gère les requêtes POST à "/products"
-    else if (req.method === "POST") {
-        // Extraire les données du corps de requête
-        const {product_name, product_description, price, category} = req.body;
-
-        // Valeur par défaut pour l'image
-        let imagePath = "default.png";
-
-        // Modifier le chemin de l'image s'il y a un fichier téléchargé
-        if (req.file) {
-            imagePath = req.file.filename;
-        }
-
-        // Extraire le token CSRF du cookie
         const csrfToken = req.cookies.csrfToken;
+        //je vérifie que le token csrf est valide
 
-        // Vérifier le token CSRF
+        //console.log(tokens.verify(csrfToken,req.body._csrf));
         if (csrfToken !== req.body._csrf) {
             res.status(403).send("Jeton CSRF invalide");
             return;
         }
 
-        // Demande à l'API d'ajouter un nouveau produit
-        axios.post("http://localhost:5000/products",
-            {
-                product_name,
-                product_description,
-                price,
-                category,
-                image: imagePath,
-            }
-        )
+        const {name, password} = req.body;
+
+        //j'envoi les données de l'utilisateur à l'API server
+
+        axios
+            .post(
+                "http://localhost:5000/login",
+                {name, password},
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            )
+            .then((response) => {
+                //res.send('Utilisateur enregistré avec succès');
+                const token = jwt.sign({name}, "secret");
+                res.cookie("jwt", token, {httpOnly: true});
+
+                return res.redirect("/dashboard");
+            })
+            .catch((err) => {
+                req.cookies.toast.type = "error";
+                req.cookies.toast.message = "Erreur  de connexion  utilisateur ! Veuillez réessayer ! ";
+                console.log(req.cookies.toast);
+                const info = {
+                    csrfToken: req.cookies.csrfToken,
+                    toast: req.cookies.toast
+                }
+                res.render("login.ejs", {info});
+                // res.status(500).send("Erreur  de connexion  utilisateur");
+            });
+    }
+});
+
+app.get("/logout", (req, res) => {
+    res.clearCookie("jwt");
+    res.redirect("/");
+});
+//  partie dashboard
+app.get("/dashboard", (req, res) => {
+
+    if (req.cookies.jwt) {
+
+        req.session.toast.message = "Connexion réussi ! Bienvenue sur votre dashboard ! ";
+        req.session.toast.type = "success";
+        res.render("dashboard.ejs", {token: req.cookies.jwt, toast: req.session.toast});
+        req.session.toast = null;
+    } else {
+        req.session.toast = "Erreur d'authentification ! ";
+        req.session.toast.type = "error";
+        res.redirect("/login");
+
+    }
+    //req.cookies.jwt ? res.render("dashboard.ejs", { token: req.cookies.jwt, toast : req.session.toast }): res.redirect("/");
+
+});
+
+// Route handler pour toutes les requêtes à "/products"
+// Route handler for all requests to "/products"
+app.all("/products", upload.single("image"), (req, res) => {
+    if (req.method === "GET") {
+        // Handle GET requests to "/products"
+        axios.get("http://localhost:5000/products")
+            .then((response) => {
+                res.status(200).json(response.data);
+            })
+            .catch((err) => {
+                res.status(500).send("Error retrieving products");
+            });
+    } else if (req.method === "POST") {
+        // Handle POST requests to "/products"
+        const {product_name, product_description, price, category} = req.body;
+        let imagePath = "default.png";
+        if (req.file) {
+            imagePath = req.file.filename;
+        }
+        const csrfToken = req.cookies.csrfToken;
+        if (csrfToken !== req.body._csrf) {
+            res.status(403).send("Invalid CSRF token");
+            return;
+        }
+        axios.post("http://localhost:5000/products", {
+            product_name,
+            product_description,
+            price,
+            category,
+            image: imagePath,
+        })
             .then((response) => {
                 res.redirect("/");
             })
-            .catch((err) => { // Gère les erreurs lors de l'ajout du produit
-                res.status(500).send("Erreur lors de l'ajout du produit");
+            .catch((err) => {
+                res.status(500).send("Error adding product");
             });
-    }
-    // Gère les requêtes DELETE à "/products"
-    else if (req.method === "DELETE") {
-        // Logique pour la suppression d'un produit
+    } else if (req.method === "DELETE") {
+        // Handle DELETE requests to "/products"
+        // Logic for deleting a product goes here
     }
 });
 
