@@ -44,7 +44,26 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 app.get("/", (req, res) => {
-  res.render("index.ejs", req.cookies.jwt ? { token: req.cookies.jwt } : null);
+  const secret = tokens.secretSync();
+
+  const token = tokens.create(secret);
+
+  //je stocke le token csrf dans un cookie
+  res.cookie("csrfToken", token, { httpOnly: true });
+  
+   if(req.cookies.toast.type !== ""){
+    const info = {
+        jwt: req.cookies.jwt,
+        toast : req.cookies.toast,
+        csrfToken: token
+    }
+    res.cookie("toast", { type: "", message: "" }, { httpOnly: true });
+        
+    return res.render("index.ejs", req.cookies.jwt ? { info } : null);
+
+   }
+ 
+  res.render("index.ejs", req.cookies.jwt ? { token: req.cookies.jwt, csrfToken : token } : null);
 });
 
 // Route pour aller sur la wiews pour enregistrer un utilisateur
@@ -101,7 +120,7 @@ app.all("/login", async (req, res) => {
     const secret = tokens.secretSync();
     const token = tokens.create(secret);
     res.cookie("toast", { type: "", message: "" }, { httpOnly: true });
-    console.log(req.cookies);
+   
     //console.log('oki');
     //declaration des toast pou affichage de message selon circonstance 
     //req.session.toast  ? req.session.toast : { type: "", message: "" }
@@ -144,7 +163,7 @@ app.all("/login", async (req, res) => {
       .catch((err) => {
         req.cookies.toast.type = "error";
         req.cookies.toast.message = "Erreur  de connexion  utilisateur ! Veuillez réessayer ! ";
-        console.log(req.cookies.toast);
+     
         const info = {
             csrfToken: req.cookies.csrfToken,
             toast : req.cookies.toast
@@ -163,12 +182,20 @@ app.get("/logout", (req, res) => {
 app.get("/dashboard", (req, res) => {
  
   if( req.cookies.jwt){
+    if( !req.cookies.toast){
+        res.cookie("toast", { type: "", message: "" }, { httpOnly: true });
+    }
+    req.cookies.toast.message = "Connexion réussi ! Bienvenue sur votre dashboard ! ";
+    req.cookies.toast.type = "success";
     
-    req.session.toast.message = "Connexion réussi ! Bienvenue sur votre dashboard ! ";
-    req.session.toast.type = "success";
-    res.render("dashboard.ejs", { token: req.cookies.jwt, toast : req.session.toast });
-    req.session.toast = null;
+    const info = {
+        jwt: req.cookies.jwt,
+        toast : req.cookies.toast
+    }
+    res.render("dashboard.ejs", { info });
+    req.cookies.toast = null;
   }else{
+
     req.session.toast = "Erreur d'authentification ! ";
     req.session.toast.type = "error";
     res.redirect("/login");
@@ -223,7 +250,15 @@ app.all("/products", upload.single("image"), (req, res) => {
         }
       )
       .then((response) => {
-        res.redirect("/dashboard");
+
+       
+        res.cookie("toast", { type: "add-success", message: "Produit ajouter  avec succes !" }, { httpOnly: true });
+        
+
+        //req.cookies.toast.message = "Produit ajouter  avec succes ! ";
+        //req.cookies.toast.type = "add-success";
+        
+        res.redirect("/");
         //res.status(200).send("Produit ajouté avec succès");
       })
       .catch((err) => {
@@ -239,6 +274,7 @@ app.get("/addProduct", (req, res) => {
   //je stocke le token csrf dans un cookie
   res.cookie("csrfToken", token, { httpOnly: true });
 
+  
   res.render("addProduct.ejs", { token: req.cookies.jwt, csrfToken: token });
 });
 // gestion des erreurs CSRF
