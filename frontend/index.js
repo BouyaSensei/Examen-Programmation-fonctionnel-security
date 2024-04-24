@@ -6,7 +6,7 @@ const tokens = new Tokens();
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
-
+const session = require('express-session');
 const cookieParser = require("cookie-parser"); // pour gérer les cookies
 
 const app = express();
@@ -16,6 +16,15 @@ app.set("view engine", "ejs");
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true })); // Pour supporter les corps encodés URL
 app.use(express.json()); // Pour supporter les corps JSON
+
+app.use(session({
+    secret: '94+@&9miowi(chcx+xr%v)wa4p+yl20s$o-2)8h!3d+y0d(1!$',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 30000 }, // Cookie expirera après 30 secondes
+}));
+
+
 // Middleware pour servir les fichiers statiques
 app.use(express.static("public"));
 
@@ -87,12 +96,26 @@ app.post("/register", async (req, res) => {
 });
 
 //  partie login
-app.all("/login", (req, res) => {
+app.all("/login", async (req, res) => {
   if (req.method === "GET") {
     const secret = tokens.secretSync();
     const token = tokens.create(secret);
+    res.cookie("toast", { type: "", message: "" }, { httpOnly: true });
+    console.log(req.cookies);
+    //console.log('oki');
+    //declaration des toast pou affichage de message selon circonstance 
+    //req.session.toast  ? req.session.toast : { type: "", message: "" }
+   // req.session.toast = { type: "", message: "" };
+
     res.cookie("csrfToken", token, { httpOnly: true });
-    res.render("login.ejs", { csrfToken: token });
+    
+    const info = {
+        csrfToken: token,
+        toast : req.cookies.toast
+    }
+    res.render("login.ejs", { info });
+    //req.session.toast = null; // Réinitialiser le toast après l'affichage
+
   } else if (req.method === "POST") {
     const csrfToken = req.cookies.csrfToken;
     if (csrfToken !== req.body._csrf) {
@@ -115,10 +138,19 @@ app.all("/login", (req, res) => {
         //res.send('Utilisateur enregistré avec succès');
         const token = jwt.sign({ name }, "secret");
         res.cookie("jwt", token, { httpOnly: true });
+        
         return res.redirect("/dashboard");
       })
       .catch((err) => {
-        res.status(500).send("Erreur  de connexion  utilisateur");
+        req.cookies.toast.type = "error";
+        req.cookies.toast.message = "Erreur  de connexion  utilisateur ! Veuillez réessayer ! ";
+        console.log(req.cookies.toast);
+        const info = {
+            csrfToken: req.cookies.csrfToken,
+            toast : req.cookies.toast
+        }
+        res.render("login.ejs", {info});
+       // res.status(500).send("Erreur  de connexion  utilisateur");
       });
   }
 });
@@ -129,13 +161,25 @@ app.get("/logout", (req, res) => {
 });
 //  partie dashboard
 app.get("/dashboard", (req, res) => {
-  req.cookies.jwt
-    ? res.render("dashboard.ejs", { token: req.cookies.jwt })
-    : res.redirect("/");
+ 
+  if( req.cookies.jwt){
+    
+    req.session.toast.message = "Connexion réussi ! Bienvenue sur votre dashboard ! ";
+    req.session.toast.type = "success";
+    res.render("dashboard.ejs", { token: req.cookies.jwt, toast : req.session.toast });
+    req.session.toast = null;
+  }else{
+    req.session.toast = "Erreur d'authentification ! ";
+    req.session.toast.type = "error";
+    res.redirect("/login");
+   
+  }
+  //req.cookies.jwt ? res.render("dashboard.ejs", { token: req.cookies.jwt, toast : req.session.toast }): res.redirect("/");
 });
 
 //  partie gestions des produits
 app.all("/products", upload.single("image"), (req, res) => {
+
   if (req.method === "GET") {
     axios
       .get("http://localhost:5000/products")
@@ -145,6 +189,7 @@ app.all("/products", upload.single("image"), (req, res) => {
       .catch((err) => {
         res.status(500).send("Erreur lors de la récupération des produits");
       });
+
   } else if (req.method === "POST") {
     const { product_name, product_description,price, category } =
       req.body;
