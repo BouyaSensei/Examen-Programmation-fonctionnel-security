@@ -75,16 +75,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Récupération des produits
+    // Get all products elements in an array
     const products = Array.from(document.querySelectorAll('#products .col-md-4'));
 
-    // Ajout d'un écouteur d'événement sur l'input de recherche
     document.getElementById('search').addEventListener('input', (e) => {
-        // Récupération de la valeur de recherche
         const searchValue = e.target.value.toLowerCase();
 
-        // Filtrage des produits
-        products.forEach((product) => {
+        products.map((product) => {
             const productName = product.querySelector('.card-title').textContent.toLowerCase();
             product.style.display = productName.includes(searchValue) ? '' : 'none';
         });
