@@ -12,6 +12,7 @@ const cookieParser = require("cookie-parser"); // pour gérer les cookies
 const app = express();
 
 app.set("view engine", "ejs");
+// TODO : Refactoriser le code
 
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true })); // Pour supporter les corps encodés URL

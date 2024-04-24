@@ -5,7 +5,7 @@ const app = express();
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 
-
+// TODO : Refactoriser le code
 
 app.use(express.json()); // Pour supporter les corps JSON
 
