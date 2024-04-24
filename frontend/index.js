@@ -35,7 +35,14 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 app.get("/", (req, res) => {
-  res.render("index.ejs", req.cookies.jwt ? { token: req.cookies.jwt } : null);
+  axios
+    .get("http://localhost:5000/products")
+    .then((response) => {
+      res.render('index.ejs', { products: response.data, token: req.cookies.jwt });
+    })
+    .catch((err) => {
+      res.status(500).send("Erreur lors de la récupération des produits");
+    });
 });
 
 // Route pour aller sur la wiews pour enregistrer un utilisateur
