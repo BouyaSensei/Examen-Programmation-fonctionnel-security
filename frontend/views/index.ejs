@@ -14,13 +14,49 @@
             href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
             rel="stylesheet"
     />
-    <style>
-        /* Ajouter des styles personnalisés ici pour résoudre les conflits */
+    
+  </head>
+  <body>
+    <% if (typeof info !== 'undefined') { %>
+    <% locals.token = info.jwt %>
+    <%} %>
+    <%- include('./components/navbar') %>
+    <!-- Inclusion de la Navbar -->
+
+
+    <!-- ajout d'un + au cas ou utilisateur connecter pour ajouter produit -->
+    <% if (locals.token) { %>
+    <div
+      class="d-flex justify-content-center align-items-center"
+      style="height: 10vh"
+    >
+      <a class="plus-sign" href="/addProduct">+</a>
+    </div>
+    <% } %>
+
+   
+   
 
         .plus-sign {
             font-size: 2rem; /* Change the size as needed */
             color: #007bff; /* Bootstrap primary color */
         }
+        
+         .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        border: 1px solid #ccc;
+        background-color: #f4f4f4;
+        color: black;
+        z-index: 1000;
+      }
+
+      .toast.error {
+        border-color: red;
+        background-color: pink;
+      }
     </style>
 </head>
 <body>
@@ -33,6 +69,36 @@
         <a class="plus-sign" href="/addProduct">+</a>
     </div>
 <% } %>
+
+ <% if (typeof info !== 'undefined') { %>
+
+        <%  csrfToken =  info.token %>
+            <% if (info.toast.type === 'add-success') { %>
+            <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                <div
+                    id="liveToast"
+                    class="toast"
+                    role="alert"
+                    aria-live="assertive"
+                    aria-atomic="true"
+                >
+                    <div class="toast-header">
+                    <strong class="me-auto">Notification</strong>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="toast"
+                        aria-label="Close"
+                    ></button>
+                    </div>
+                    <div class="toast-body">
+                    <%= info.toast.message %>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+        <% } %>
+        
 <!-- Barre de recherche -->
 
 <div class="container mt-4">
@@ -59,6 +125,7 @@
                         </select>
                     </div>
                 </div>
+                 <input type="hidden" name="_csrf" value=<%= csrfToken %>>
             </form>
 
             <!-- Affichage des produits -->
@@ -81,6 +148,7 @@
                 </div>
             </div>
             <!-- Fin de l'affichage des produits -->
+
         </div>
     </div>
 </div>
@@ -116,8 +184,21 @@
         });
     }
 
+
     searchInput.addEventListener('input', filterProducts);
     categorySelect.addEventListener('change', filterProducts);
 </script>
+ <!-- Scripts nécessaires pour le toast -->
+   
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    var toastEl = document.getElementById('liveToast');
+                    var toast = new bootstrap.Toast(toastEl,{
+                        delay: 3000
+                    });
+                    toast.show();
+                });
+                </script>
 </body>
+
 </html>

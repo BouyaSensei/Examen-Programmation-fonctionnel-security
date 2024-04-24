@@ -41,6 +41,7 @@ const storage = multer.diskStorage({
         );
     },
 });
+
 const upload = multer({storage: storage});
 app.get("/", async (req, res) => {
     try {
@@ -57,6 +58,7 @@ app.get("/", async (req, res) => {
         console.error(error);
         res.status(500).send("An error occurred");
     }
+
 });
 
 // Route pour aller sur la wiews pour enregistrer un utilisateur
@@ -74,38 +76,42 @@ app.get("/register", (req, res) => {
 // Route pour enregistrer un utilisateur
 app.post("/register", async (req, res) => {
 
-    //je récupère le token csrf dans le cookie
-    const csrfToken = req.cookies.csrfToken;
-    //je vérifie que le token csrf est valide
+  //je récupère le token csrf dans le cookie
+  const csrfToken = req.cookies.csrfToken;
+  //je vérifie que le token csrf est valide
 
-    //console.log(tokens.verify(csrfToken,req.body._csrf));
-    if (csrfToken !== req.body._csrf) {
-        res.status(403).send("Jeton CSRF invalide");
-        return;
-    }
+  //console.log(tokens.verify(csrfToken,req.body._csrf));
+  if (csrfToken !== req.body._csrf) {
+    res.status(403).send("Jeton CSRF invalide");
+    return;
+  }
 
-    const {name, password} = req.body;
+  const { name, password } = req.body;
 
-    //j'envoi les données de l'utilisateur à l'API server
+  //j'envoi les données de l'utilisateur à l'API server
 
-    await axios
-        .post(
-            "http://localhost:5000/register",
-            {name, password},
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        )
-        .then((response) => {
-            //res.send('Utilisateur enregistré avec succès');
+  await axios
+    .post(
+      "http://localhost:5000/register",
+      { name, password },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    .then((response) => {
+      //res.send('Utilisateur enregistré avec succès');
 
-            return res.redirect("/login");
-        })
-        .catch((err) => {
-            res.status(500).send("Erreur lors de l'enregistrement de l'utilisateur");
-        });
+      return res.redirect("/login");
+    })
+    .catch((err) => {
+      res.status(500).send("Erreur lors de l'enregistrement de l'utilisateur");
+    });
+});
+
+
+   
 });
 
 //  partie login
@@ -182,21 +188,30 @@ app.get("/logout", (req, res) => {
 //  partie dashboard
 app.get("/dashboard", (req, res) => {
 
-    if (req.cookies.jwt) {
-
-        req.session.toast.message = "Connexion réussi ! Bienvenue sur votre dashboard ! ";
-        req.session.toast.type = "success";
-        res.render("dashboard.ejs", {token: req.cookies.jwt, toast: req.session.toast});
-        req.session.toast = null;
-    } else {
-        req.session.toast = "Erreur d'authentification ! ";
-        req.session.toast.type = "error";
-        res.redirect("/login");
-
+ 
+  if( req.cookies.jwt){
+    if( !req.cookies.toast){
+        res.cookie("toast", { type: "", message: "" }, { httpOnly: true });
     }
-    //req.cookies.jwt ? res.render("dashboard.ejs", { token: req.cookies.jwt, toast : req.session.toast }): res.redirect("/");
+    req.cookies.toast.message = "Connexion réussi ! Bienvenue sur votre dashboard ! ";
+    req.cookies.toast.type = "success";
+    
+    const info = {
+        jwt: req.cookies.jwt,
+        toast : req.cookies.toast
+    }
+    res.render("dashboard.ejs", { info });
+    req.cookies.toast = null;
+  }else{
 
+    req.session.toast = "Erreur d'authentification ! ";
+    req.session.toast.type = "error";
+    res.redirect("/login");
+   
+  }
+  //req.cookies.jwt ? res.render("dashboard.ejs", { token: req.cookies.jwt, toast : req.session.toast }): res.redirect("/");
 });
+
 
 // Route handler pour toutes les requêtes à "/products"
 // Route handler for all requests to "/products"
@@ -222,6 +237,25 @@ app.all("/products", upload.single("image"), (req, res) => {
             res.status(403).send("Invalid CSRF token");
             return;
         }
+
+      )
+      .then((response) => {
+
+       
+        res.cookie("toast", { type: "add-success", message: "Produit ajouter  avec succes !" }, { httpOnly: true });
+        
+
+        //req.cookies.toast.message = "Produit ajouter  avec succes ! ";
+        //req.cookies.toast.type = "add-success";
+        
+        res.redirect("/");
+        //res.status(200).send("Produit ajouté avec succès");
+      })
+      .catch((err) => {
+        res.status(500).send("Erreur lors de l'ajout du produit");
+      });
+  }
+
         axios.post("http://localhost:5000/products", {
             product_name,
             product_description,
@@ -251,6 +285,7 @@ app.get("/categories", (req, res) => {
             // Gère les erreurs lors de la récupération des catégories
             res.status(500).send("Erreur lors de la récupération des catégories");
         });
+
 });
 app.get("/addProduct", (req, res) => {
     const secret = tokens.secretSync();
@@ -260,7 +295,10 @@ app.get("/addProduct", (req, res) => {
     //je stocke le token csrf dans un cookie
     res.cookie("csrfToken", token, {httpOnly: true});
 
-    res.render("addProduct.ejs", {token: req.cookies.jwt, csrfToken: token});
+
+  
+  res.render("addProduct.ejs", { token: req.cookies.jwt, csrfToken: token });
+
 });
 // gestion des erreurs CSRF
 
