@@ -14,52 +14,39 @@
             href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
             rel="stylesheet"
     />
-    
+    <style>
+        .plus-sign {
+              font-size: 2rem; /* Change the size as needed */
+              color: #007bff; /* Bootstrap primary color */
+          }
+          
+           .toast {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          padding: 10px 20px;
+          border: 1px solid #ccc;
+          background-color: #f4f4f4;
+          color: black;
+          z-index: 1000;
+        }
+  
+        .toast.error {
+          border-color: red;
+          background-color: pink;
+        }
+      
+    </style>
   </head>
+  
   <body>
     <% if (typeof info !== 'undefined') { %>
     <% locals.token = info.jwt %>
     <%} %>
-    <%- include('./components/navbar') %>
+   
     <!-- Inclusion de la Navbar -->
+      
 
-
-    <!-- ajout d'un + au cas ou utilisateur connecter pour ajouter produit -->
-    <% if (locals.token) { %>
-    <div
-      class="d-flex justify-content-center align-items-center"
-      style="height: 10vh"
-    >
-      <a class="plus-sign" href="/addProduct">+</a>
-    </div>
-    <% } %>
-
-   
-   
-
-        .plus-sign {
-            font-size: 2rem; /* Change the size as needed */
-            color: #007bff; /* Bootstrap primary color */
-        }
-        
-         .toast {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 10px 20px;
-        border: 1px solid #ccc;
-        background-color: #f4f4f4;
-        color: black;
-        z-index: 1000;
-      }
-
-      .toast.error {
-        border-color: red;
-        background-color: pink;
-      }
-    </style>
-</head>
-<body>
 <%- include('./components/navbar') %>
 <!-- Inclusion de la Navbar -->
 
@@ -190,15 +177,15 @@
 </script>
  <!-- Scripts nécessaires pour le toast -->
    
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    var toastEl = document.getElementById('liveToast');
-                    var toast = new bootstrap.Toast(toastEl,{
-                        delay: 3000
-                    });
-                    toast.show();
-                });
-                </script>
+ <script>
+      document.addEventListener('DOMContentLoaded', function() {
+       var toastEl = document.getElementById('liveToast');
+            var toast = new bootstrap.Toast(toastEl,{
+                delay: 3000
+            });
+        toast.show();
+      });
+ </script>
 </body>
 
 </html>

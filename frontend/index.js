@@ -48,11 +48,15 @@ app.get("/", async (req, res) => {
         const productsResponse = await axios.get("http://localhost:5000/products");
         const categoriesResponse = await axios.get("http://localhost:5000/categories");
         const token = req.cookies.jwt;
+        const secret = tokens.secretSync();
 
+        const csrf_token = tokens.create(secret);
+      
         res.render('index.ejs', {
             products: productsResponse.data,
             categories: categoriesResponse.data,
-            token: token
+            token: token,
+            csrfToken : csrf_token
         });
     } catch (error) {
         console.error(error);
@@ -112,7 +116,7 @@ app.post("/register", async (req, res) => {
 
 
    
-});
+
 
 //  partie login
 app.all("/login", async (req, res) => {
@@ -237,25 +241,6 @@ app.all("/products", upload.single("image"), (req, res) => {
             res.status(403).send("Invalid CSRF token");
             return;
         }
-
-      )
-      .then((response) => {
-
-       
-        res.cookie("toast", { type: "add-success", message: "Produit ajouter  avec succes !" }, { httpOnly: true });
-        
-
-        //req.cookies.toast.message = "Produit ajouter  avec succes ! ";
-        //req.cookies.toast.type = "add-success";
-        
-        res.redirect("/");
-        //res.status(200).send("Produit ajouté avec succès");
-      })
-      .catch((err) => {
-        res.status(500).send("Erreur lors de l'ajout du produit");
-      });
-  }
-
         axios.post("http://localhost:5000/products", {
             product_name,
             product_description,
@@ -263,12 +248,18 @@ app.all("/products", upload.single("image"), (req, res) => {
             category,
             image: imagePath,
         })
-            .then((response) => {
-                res.redirect("/");
-            })
-            .catch((err) => {
-                res.status(500).send("Error adding product");
-            });
+      
+      .then((response) => {
+
+        res.cookie("toast", { type: "add-success", message: "Produit ajouter  avec succes !" }, { httpOnly: true });
+        
+        res.redirect("/");
+        //res.status(200).send("Produit ajouté avec succès");
+      })
+      .catch((err) => {
+        res.status(500).send("Erreur lors de l'ajout du produit");
+      });
+  
     } else if (req.method === "DELETE") {
         // Handle DELETE requests to "/products"
         // Logic for deleting a product goes here
