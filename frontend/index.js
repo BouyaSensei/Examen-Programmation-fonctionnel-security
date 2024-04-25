@@ -51,11 +51,9 @@ app.get("/", async (req, res) => {
         const secret = tokens.secretSync();
         
         const csrf_token = tokens.create(secret);
-        if(!req.cookies.toast){
-            res.cookie("toast", { type: "", message: "" }, { httpOnly: true });
-        }
+       
         
-        if(req.cookies.toast){
+        if(req.cookies.toast && req.cookies.jwt){
            
             const info = {
                 jwt: req.cookies.jwt,
@@ -65,11 +63,13 @@ app.get("/", async (req, res) => {
                 products: productsResponse.data,
             }
            
-                
-            return res.render("index.ejs", req.cookies.jwt ? { info } : null);
+             
+            return res.render("index.ejs", req.cookies.jwt ?  {info}  : null);
         
            }
-        
+           if(!req.cookies.toast){
+            res.cookie("toast", { type: "", message: "" }, { httpOnly: true });
+        }
         res.render('index.ejs', {
             products: productsResponse.data,
             categories: categoriesResponse.data,
