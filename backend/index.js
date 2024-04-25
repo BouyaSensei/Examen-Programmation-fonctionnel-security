@@ -80,6 +80,37 @@ app.post('/login', async (req, res) => {
     );
 
 })
+app.get('/product/:id', (req, res) => {
+    const {id} = req.params;
+    connection.query('SELECT * FROM produit WHERE ID = ?', [id], (err, results) => {
+        if (err) {
+            res.status(500).send('Erreur lors de la récupération du produit');
+        } else {
+            if (results.length > 0) {
+                res.status(200).json(results[0]);
+            } else {
+                res.status(404).send('Produit non trouvé');
+            }
+        }
+    });
+});
+app.put('/product/:id', (req, res) => {
+    const {id} = req.params;
+    const {product_name, product_description, price, category, image} = req.body;
+
+    connection.query(
+        'UPDATE produit SET Libellé = ?, Description = ?, Images = ?, Prix = ?, Catégorie = ? WHERE ID = ?',
+        [product_name, product_description, image, price, category, id],
+        (err, results) => {
+            if (err) {
+                console.log(err);
+                res.status(500).send('Erreur lors de la modification du produit');
+            } else {
+                res.status(200).send('Produit modifié avec succès');
+            }
+        }
+    );
+});
 
 app.all('/products', (req, res) => {
     if (req.method === 'GET') {

@@ -121,14 +121,14 @@
                 <div class="row">
                     <% products.forEach(product => { %>
                         <div class="col-md-4">
-                            <div class="card">
+                            <div class="card" >
                                 <div class="card-body">
                                     <h5 class="card-title"><%= product.Libellé %></h5>
-                                    <img src="http://localhost:3000/public/images/<%= product.Images %>" alt="<%= product.Libellé %>" class="img-fluid"/>
+                                    <img class="card-img-top" src="http://localhost:3000/public/images/<%= product.Images %>" alt="<%= product.Libellé %>" />
                                     <p class="card-text"><%= product.Description %></p>
                                     <p class="card-text"><%= product.Prix %> €</p>
                                     <p class="card-category d-none"><%= product.Catégorie %></p>
-                                    <a href="#" class="btn btn-primary">Voir plus</a>
+                                    <a href="/product/<%= product.ID %>" class="btn btn-primary">Voir plus</a>
                                 </div>
                             </div>
                         </div>
@@ -136,7 +136,6 @@
                 </div>
             </div>
             <!-- Fin de l'affichage des produits -->
-
         </div>
     </div>
 </div>

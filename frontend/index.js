@@ -198,7 +198,18 @@ app.all("/login", async (req, res) => {
             });
     }
 });
-
+app.get("/product/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const productResponse = await axios.get(`http://localhost:5000/product/${id}`);
+        res.render('product.ejs', {
+            product: productResponse.data
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("An error occurred while fetching the product");
+    }
+});
 app.get("/logout", (req, res) => {
     res.clearCookie("jwt");
     res.redirect("/");
