@@ -264,7 +264,7 @@ app.all("/login", async (req, res) => {
                               
                                   } else {
                                     // Sinon, afficher un message d'erreur
-                                    console.error('Erreur lors de l\'ajout du produit au panier apres connexion :');
+                                    console.error('Erreur lors de l\'ajout du produit au panier apres etre connecter :');
                                     // Vous pouvez gérer l'affichage de l'erreur comme vous le souhaitez ici
                                   }
                                 } catch (error) {
