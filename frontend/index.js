@@ -232,8 +232,7 @@ app.get("/dashboard", (req, res) => {
 
 
 // Route handler pour toutes les requêtes à "/products"
-// Route handler for all requests to "/products"
-app.all("/products", upload.single("image"), (req, res) => {
+app.all("/products", upload.array("image", 10), (req, res) => {
     if (req.method === "GET") {
         // Handle GET requests to "/products"
         axios.get("http://localhost:5000/products")
@@ -248,7 +247,7 @@ app.all("/products", upload.single("image"), (req, res) => {
         const {product_name, product_description, price, category} = req.body;
         let imagePath = "default.png";
         if (req.file) {
-            imagePath = req.file.filename;
+            imagePath = req.files.map(file => file.path).join(',');
         }
         const csrfToken = req.cookies.csrfToken;
         if (csrfToken !== req.body._csrf) {
