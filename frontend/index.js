@@ -54,8 +54,8 @@ app.get("/", async (req, res) => {
         if(!req.cookies.toast){
             res.cookie("toast", { type: "", message: "" }, { httpOnly: true });
         }
-        console.log(req.cookies);
-        if(req.cookies.toast.type !== "" ){
+        
+        if(req.cookies.toast){
            
             const info = {
                 jwt: req.cookies.jwt,
