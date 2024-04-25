@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store</title>
+    <!-- Liens CDN pour Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Liens CDN pour Materialize -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <style>
+        /* Ajouter des styles personnalisés ici pour résoudre les conflits */
+        .container {
+            max-width: 800px;
+        }
+
+        .input-field {
+            margin-top: 20px;
+        }
+    </style>
+
+    <%- include('./components/navbar') %>
+
+
+</head>
+<body>
+<section id="product-details" class="container mt-5">
+    <div class="row">
+        <div class="col-lg-6">
+            <img src="/public/images/<%= product.Images %>" alt="<%= product.Libellé %>"
+                 class="img-fluid rounded mb-10">
+        </div>
+        <div class="col-lg-6">
+            <h2 class="display-5 mb-3"><%= product.Libellé %></h2>
+            <p class="lead">Description:</p>
+            <p><%= product.Description %></p>
+            <p class="lead">Prix: <%= product.Prix %> €</p>
+            <p class="lead">Catégorie: <%= product.Catégorie %></p>
+            <a href="#" class="btn btn-primary mt-3">Ajouter au panier</a>
+        </div>
+    </div>
+</section>
+</body>
+
+<!-- Scripts nécessaires pour Bootstrap et Materialize -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const products = Array.from(document.querySelectorAll('#products .col-md-4'));
+
+    const searchInput = document.getElementById('search');
+    const categorySelect = document.getElementById('category-select');
+
+    function filterProducts() {
+        const searchValue = searchInput.value.toLowerCase().trim();
+        const selectedCategory = categorySelect.value.toLowerCase().trim();
+
+        // Crée une nouvelle liste de produits affichables selon la recherche et la catégorie
+        const displayableProducts = products.map((product) => {
+            const productName = product.querySelector('.card-title').textContent.toLowerCase().trim();
+            const productCategory = product.querySelector('.card-category').textContent.toLowerCase().trim();
+
+            const shouldDisplay =
+                productName.includes(searchValue) &&
+                (productCategory === selectedCategory || !selectedCategory);
+
+            return shouldDisplay ? product : null;
+        });
+
+        // Modifie l'affichage des produits dans le DOM
+        products.forEach((product, i) => {
+            product.style.display = displayableProducts[i] ? '' : 'none';
+        });
+    }
+
+
+    searchInput.addEventListener('input', filterProducts);
+    categorySelect.addEventListener('change', filterProducts);
+</script>
+<!-- Scripts nécessaires pour le toast -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var toastEl = document.getElementById('liveToast');
+        var toast = new bootstrap.Toast(toastEl, {
+            delay: 3000
+        });
+        toast.show();
+    });
+</script>
+</body>
+
+</html>
