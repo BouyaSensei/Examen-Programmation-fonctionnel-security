@@ -36,7 +36,18 @@
             <p><%= product.Description %></p>
             <p class="lead">Prix: <%= product.Prix %> €</p>
             <p class="lead">Catégorie: <%= product.Catégorie %></p>
-            <a href="#" class="btn btn-primary mt-3">Ajouter au panier</a>
+            <form action="http://localhost:3000/addToCart" method="POST">
+                <!-- Champs cachés pour stocker les données -->
+                <% if(locals.user_id) { %>
+                  <input type="hidden" name="user_id" value="<%= user_id %>">
+                  <% } %>
+
+                  <input type="hidden" name="product_id" value="<%= product.ID %>">
+                  <input type="hidden" name="quantity" value="1"> <!-- Par défaut, ajoute une quantité de 1 -->
+                  
+                  <button type="submit" class="btn btn-primary mt-3">Ajouter au panier</button>
+            </form>
+            <!-- <a href="#" class="btn btn-primary mt-3">Ajouter au panier</a> -->
         </div>
     </div>
 </section>
