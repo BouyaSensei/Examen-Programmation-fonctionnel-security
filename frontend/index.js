@@ -250,9 +250,7 @@ app.all("/products", upload.array("image", 10), (req, res) => {
         // Handle POST requests to "/products"
         const {product_name, product_description, price, category} = req.body;
         let imagePath = "default.png";
-        if (req.file) {
-            imagePath = req.files.map(file => file.path).join(',');
-        }
+        imagePath = req.files.map(file => file.path).join(', ');
         const csrfToken = req.cookies.csrfToken;
         if (csrfToken !== req.body._csrf) {
             res.status(403).send("Invalid CSRF token");
