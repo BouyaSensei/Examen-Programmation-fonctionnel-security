@@ -280,7 +280,18 @@ app.all("/products", upload.array("image", 10), (req, res) => {
         // Logic for deleting a product goes here
     }
 });
-
+app.get("/product/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const productResponse = await axios.get(`http://localhost:5000/product/${id}`);
+        res.render('product.ejs', {
+            product: productResponse.data
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("An error occurred while fetching the product");
+    }
+});
 app.get("/categories", (req, res) => {
     // Demander à l'API les catégories et envoyer les données obtenues en réponse
     axios.get("http://localhost:5000/categories")
