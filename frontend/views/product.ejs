@@ -18,7 +18,11 @@
             margin-top: 20px;
         }
     </style>
-
+    <% if (typeof info !== 'undefined') { %>
+        <% locals.token = info.jwt %>
+        
+        <%} %>
+       
     <%- include('./components/navbar') %>
 
 

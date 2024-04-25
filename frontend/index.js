@@ -282,10 +282,13 @@ app.all("/products", upload.array("image", 10), (req, res) => {
 });
 app.get("/product/:id", async (req, res) => {
     const { id } = req.params;
+    const jwt = req.cookies.jwt;
     try {
         const productResponse = await axios.get(`http://localhost:5000/product/${id}`);
         res.render('product.ejs', {
-            product: productResponse.data
+            product: productResponse.data,
+            token : jwt
+
         });
     } catch (error) {
         console.error(error);
