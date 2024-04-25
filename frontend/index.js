@@ -81,7 +81,7 @@ app.get("/", async (req, res) => {
                 }
               });
               const user_id = userResponse.data.user_id;
-              console.log("ID de l'utilisateur récupéré:", user_id);
+              console.log("ID de l'utilisateur actuelle récupéré:", user_id);
       
               if(req.cookies.toast && req.cookies.jwt){
            
