@@ -8,7 +8,6 @@ const multer = require("multer");
 const path = require("path");
 const session = require('express-session');
 const cookieParser = require("cookie-parser"); // pour gérer les cookies
-const  bodyParser = require('body-parser');
 const { expressCspHeader, NONCE, SELF, UNSAFE_INLINE,INLINE} = require('express-csp-header');
 const app = express();
 
