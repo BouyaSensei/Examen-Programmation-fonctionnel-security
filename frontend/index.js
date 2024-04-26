@@ -211,7 +211,7 @@ app.post("/register", async (req, res) => {
         res.cookie("csrfToken", token, { httpOnly: true });
         return res.render("register.ejs", {
             csrfToken: token,
-            errorMessage: "Mot de passe incorrect. Il doit contenir au moins une majuscule, un caractère spécial et avoir une longueur d'au moins 8 caractères.",
+            errorMessage: "Mot de passe incorrect. Il doit contenir au moins une majuscule, un chiffre, un caractère spécial et plus de 8 caractères.",
             nonce : req.nonce
         });
     }
