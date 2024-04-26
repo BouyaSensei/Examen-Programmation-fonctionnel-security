@@ -27,27 +27,40 @@ app.use(session({
 
 //'img-src': ['data:', 'images.com'],
 app.use(expressCspHeader({
-  directives: {
 
-    'script-src': [SELF, NONCE, UNSAFE_INLINE, INLINE, 'https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js',
-      'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'],
-    'style-src': [SELF, NONCE, UNSAFE_INLINE, INLINE, 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css'
-      , 'https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css']
-  },
-  generateNonce: true,  // Active la génération de nonce
-  reportUri: 'https://cspreport.com/send',
-  reportTo: [
-    {
-      group: 'my-report-group',
-      max_age: 30 * 60,
-      endpoints: [{ url: 'https://cspreport.com/send' }],
-      include_subdomains: true
+    directives: {
+       
+        'script-src': [SELF,NONCE,UNSAFE_INLINE,INLINE,'https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js',
+        'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'],
+        'style-src': [SELF,NONCE,UNSAFE_INLINE,INLINE, 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css'
+        ,'https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css'],
+        'report-uri': 'http://localhost:3000/report-violation'
     },
-  ]
-}));
+   
+    generateNonce: true,  // Active la génération de nonce
+    
+    
 
+}));
+// Middleware pour ajouter l'en-tête Content-Security-Policy
+app.use((req, res, next) => {
+    res.setHeader('Reporting-Endpoints', 'default="http://localhost:3000/report-violation"');
+    next();
+  });
 // Middleware pour servir les fichiers statiques
 app.use(express.static("public"));
+app.post('/report-violation',express.json({type: 'application/csp-report'}) , (req, res) => {
+    if (req.body) {
+        
+        console.log('CSP Violation: ', req.body);
+        res.status(204).end();
+    } else {
+        console.log('CSP Violation: No data received!');
+        res.status(400).send('No data received'); 
+    }
+   // res.status(204).end(); // Renvoyer une réponse sans contenu
+});
+
 app.use('/public/images', express.static('public/images'));
 // Configuration de Multer
 const storage = multer.diskStorage({
@@ -62,7 +75,10 @@ const storage = multer.diskStorage({
   },
 });
 
+
 const upload = multer({ storage: storage });
+
+
 app.get("/", async (req, res) => {
   try {
     const productsResponse = await axios.get("http://localhost:5000/products");
@@ -149,51 +165,72 @@ app.get("/", async (req, res) => {
 
 // Route pour aller sur la wiews pour enregistrer un utilisateur
 app.get("/register", (req, res) => {
-  const secret = tokens.secretSync();
 
-  const token = tokens.create(secret);
+    const secret = tokens.secretSync();
+    const token = tokens.create(secret);
+    // Je stocke le token csrf dans un cookie
+    res.cookie("csrfToken", token, { httpOnly: true });
+    
+    const errorMessage = req.query.error; // Vérifie si une erreur est passée en tant que paramètre GET
 
-  //je stocke le token csrf dans un cookie
-  res.cookie("csrfToken", token, { httpOnly: true });
+    // Rendre la page d'inscription en transmettant le token csrf et éventuellement le message d'erreur
+    res.render("register.ejs", { csrfToken: token, errorMessage });
 
-  res.render("register.ejs", { csrfToken: token });
 });
 
-// Route pour enregistrer un utilisateur
 app.post("/register", async (req, res) => {
+    const csrfToken = req.cookies.csrfToken;
+    
+    // Vérification du token csrf
+    if (csrfToken !== req.body._csrf) {
+        res.status(403).send("Jeton CSRF invalide");
+        return;
+    }
 
-  //je récupère le token csrf dans le cookie
-  const csrfToken = req.cookies.csrfToken;
-  //je vérifie que le token csrf est valide
+    const { name, password } = req.body;
+    const passwordRegexUpperCase = /^(?=.*[A-Z])/; // Au moins une majuscule
+    const passwordRegexSpecialChar = /^(?=.*[@$!%*?&.()\\[\]{}<>^=+-_~|:;,])/; // Au moins un caractère spécial
+    const passwordMinLength = /^(?=.{8,})/; // Au moins 8 caractères
 
-  //console.log(tokens.verify(csrfToken,req.body._csrf));
-  if (csrfToken !== req.body._csrf) {
-    res.status(403).send("Jeton CSRF invalide");
-    return;
-  }
+    if (!name || name.trim() === "") { // Vérification de la présence de l'indentifiant
+        const secret = tokens.secretSync();
+        const token = tokens.create(secret);
+        res.cookie("csrfToken", token, { httpOnly: true });
+        return res.render("register.ejs", {
+            csrfToken: token,
+            errorMessage: "Veuillez saisir un identifiant."
+        });
+    }
 
-  const { name, password } = req.body;
+    if (!passwordRegexUpperCase.test(password) || !passwordRegexSpecialChar.test(password) || !passwordMinLength.test(password)) { // Vérification pour le mdp 
+        const secret = tokens.secretSync();
+        const token = tokens.create(secret);
+        res.cookie("csrfToken", token, { httpOnly: true });
+        return res.render("register.ejs", {
+            csrfToken: token,
+            errorMessage: "Mot de passe incorrect. Il doit contenir au moins une majuscule, un caractère spécial et avoir une longueur d'au moins 8 caractères."
+        });
+    }
 
-  //j'envoi les données de l'utilisateur à l'API server
+    //j'envoie les données de l'utilisateur à l'API server
+    await axios
+        .post(
+            "http://localhost:5000/register",
+            { name, password },
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        )
+        .then((response) => {
+            //res.send('Utilisateur enregistré avec succès');
 
-  await axios
-    .post(
-      "http://localhost:5000/register",
-      { name, password },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    )
-    .then((response) => {
-      //res.send('Utilisateur enregistré avec succès');
-
-      return res.redirect("/login");
-    })
-    .catch((err) => {
-      res.status(500).send("Erreur lors de l'enregistrement de l'utilisateur");
-    });
+            return res.redirect("/login");
+        })
+        .catch((err) => {
+            res.status(500).send("Erreur lors de l'enregistrement de l'utilisateur");
+        });
 });
 
 
