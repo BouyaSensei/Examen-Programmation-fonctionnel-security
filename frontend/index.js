@@ -319,7 +319,7 @@ app.all("/login", async (req, res) => {
               req.session.cart.forEach(async function (element) {
                 try {
                   // Effectuer une requête pour ajouter le produit au panier
-                  const response = await axios.post('http://localhost:5000/addToCart', { user_id: user_id, product_id: element["ID"], quantity: element["quantity"] });
+                  const response = await axios.post('http://localhost:5000/addToCart', { user_id: user_id, product_id: element["ID"], quantity: element["quantity"], prix: element["prix"] });
                   // Vérifier si l'ajout au panier a réussi
                   if (response.data.success) {
                     console.log("Produit ajouté");
@@ -336,7 +336,7 @@ app.all("/login", async (req, res) => {
               // Une fois que tous les produits ont été ajoutés au panier, vider le panier dans la session
               req.session.cart = [];
               // Rediriger l'utilisateur vers la page du panier une fois que tous les produits ont été ajoutés avec succès
-              res.redirect("/panier");
+              // res.redirect("/panier");
             }
 
 
@@ -364,6 +364,7 @@ app.all("/login", async (req, res) => {
 
 app.get("/logout", (req, res) => {
   res.clearCookie("jwt");
+  req.session.cart = [];
   res.redirect("/");
 });
 //  partie dashboard
