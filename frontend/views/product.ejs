@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Store</title>
     <!-- Liens CDN pour Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link nonce="<%= nonce %>" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Liens CDN pour Materialize -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-    <style>
+    <link nonce="<%= nonce %>" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <style nonce="<%= nonce %>">
         /* Ajouter des styles personnalisés ici pour résoudre les conflits */
         .container {
             max-width: 800px;
@@ -58,9 +58,9 @@
 </body>
 
 <!-- Scripts nécessaires pour Bootstrap et Materialize -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
+<script  nonce="<%= nonce %>" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script nonce="<%= nonce %>" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script nonce="<%= nonce %>">
     const products = Array.from(document.querySelectorAll('#products .col-md-4'));
 
     const searchInput = document.getElementById('search');
@@ -94,7 +94,7 @@
 </script>
 <!-- Scripts nécessaires pour le toast -->
 
-<script>
+<script nonce="<%= nonce %>" >
     document.addEventListener('DOMContentLoaded', function () {
         var toastEl = document.getElementById('liveToast');
         var toast = new bootstrap.Toast(toastEl, {

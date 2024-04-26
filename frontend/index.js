@@ -8,7 +8,7 @@ const multer = require("multer");
 const path = require("path");
 const session = require('express-session');
 const cookieParser = require("cookie-parser"); // pour gérer les cookies
-
+const { expressCspHeader, NONCE, SELF, UNSAFE_INLINE,INLINE} = require('express-csp-header');
 const app = express();
 
 app.set("view engine", "ejs");
@@ -25,6 +25,26 @@ app.use(session({
     cookie: {maxAge: 30000}, // Cookie expirera après 30 secondes
 }));
 
+//'img-src': ['data:', 'images.com'],
+app.use(expressCspHeader({
+    directives: {
+       
+        'script-src': [SELF,NONCE,UNSAFE_INLINE,INLINE,'https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js',
+        'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'],
+        'style-src': [SELF,NONCE,UNSAFE_INLINE,INLINE, 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css'
+        ,'https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css']
+    },
+    generateNonce: true,  // Active la génération de nonce
+    reportUri: 'https://cspreport.com/send',
+    reportTo: [
+        {
+            group: 'my-report-group',
+            max_age: 30 * 60,
+            endpoints: [{ url: 'https://cspreport.com/send'}],
+            include_subdomains: true
+        },
+    ]
+}));
 
 // Middleware pour servir les fichiers statiques
 app.use(express.static("public"));
@@ -51,17 +71,18 @@ app.get("/", async (req, res) => {
         const secret = tokens.secretSync();
         
         const csrf_token = tokens.create(secret);
-       
+        
         jwt.verify(token, 'secret', async (err, decoded) => {
             if (err) {
             //   console.error("Erreur lors de la vérification du jeton JWT:", err);
             //   return res.status(401).json({ status: 'Erreur', message: 'Jeton inconnu' });
+            
               return res.render("index.ejs", {
                 products: productsResponse.data,
                 categories: categoriesResponse.data,
                 token: token,
                 csrfToken : csrf_token,
-                
+                nonce : req.nonce
               }
               
               
@@ -91,7 +112,8 @@ app.get("/", async (req, res) => {
                     csrfToken: token,
                     categories: categoriesResponse.data,
                     products: productsResponse.data,
-                    user_id: user_id
+                    user_id: user_id,
+                    nonce: req.nonce
                 }
                
                  
@@ -181,6 +203,7 @@ app.post("/register", async (req, res) => {
 //  partie login
 app.all("/login", async (req, res) => {
     if (req.method === "GET") {
+       
         const secret = tokens.secretSync();
         const token = tokens.create(secret);
         res.cookie("toast", {type: "", message: ""}, {httpOnly: true});
@@ -193,7 +216,8 @@ app.all("/login", async (req, res) => {
 
         const info = {
             csrfToken: token,
-            toast: req.cookies.toast
+            toast: req.cookies.toast,
+            nonce: req.nonce
         }
         res.render("login.ejs", {info});
         //req.session.toast = null; // Réinitialiser le toast après l'affichage
@@ -316,7 +340,8 @@ app.get("/dashboard", (req, res) => {
     
     const info = {
         jwt: req.cookies.jwt,
-        toast : req.cookies.toast
+        toast : req.cookies.toast,
+        nonce : req.nonce
     }
     res.render("dashboard.ejs", { info });
     req.cookies.toast = null;
@@ -383,7 +408,8 @@ app.get("/product/:id", async (req, res) => {
         const productResponse = await axios.get(`http://localhost:5000/product/${id}`);
         res.render('product.ejs', {
             product: productResponse.data,
-            token : jwt
+            token : jwt,
+            nonce : req.nonce
 
         });
     } catch (error) {
