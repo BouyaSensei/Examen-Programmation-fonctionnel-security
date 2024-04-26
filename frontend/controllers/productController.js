@@ -137,6 +137,23 @@ const productController = {
         res.cookie("csrfToken", token, {httpOnly: true});
 
         res.render("addProduct.ejs", {token: req.cookies.jwt, csrfToken: token});
+    },
+    updateProduct: (req, res) => {
+        const { id } = req.params;
+        const { product_name, product_description, price, category } = req.body;
+
+        axios.put(`http://localhost:5000/product/${id}`, {
+            product_name,
+            product_description,
+            price,
+            category,
+        })
+            .then((response) => {
+                res.status(200).send("Produit mis à jour avec succès");
+            })
+            .catch((err) => {
+                res.status(500).send("Erreur lors de la mise à jour du produit");
+            });
     }
 };
 

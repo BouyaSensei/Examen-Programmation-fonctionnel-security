@@ -6,7 +6,7 @@ const productController = require('../controllers/productController');
 router.get('/product/:id', productController.getProductById);
 
 // Route pour mettre à jour un produit par son ID
-router.put('/product/:id', productController.updateProduct);
+router.put('/products/:id', productController.updateProduct);
 
 // Route pour obtenir tous les produits
 router.get('/products', productController.getAllProducts);

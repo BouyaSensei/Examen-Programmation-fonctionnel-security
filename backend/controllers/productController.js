@@ -22,16 +22,42 @@ exports.getProductById = (req, res) => {
 
 exports.updateProduct = (req, res) => {
     const {id} = req.params;
-    const {product_name, product_description, price, category, image} = req.body;
+    const {name, description, price, category} = req.body;
+
+    const updatedFields = [];
+    let query = "UPDATE produit SET ";
+
+    if (name) {
+        updatedFields.push(name);
+        query += "Libellé = ?, ";
+    }
+    if (description) {
+        updatedFields.push(description);
+        query += "Description = ?, ";
+    }
+    if (price) {
+        updatedFields.push(price);
+        query += "Prix = ?, ";
+    }
+    if (category) {
+        updatedFields.push(category);
+        query += "Catégorie = ?, ";
+    }
+
+    query = query.slice(0, -2);
+
+    updatedFields.push(id);
+
+    query += " WHERE ID = ?";
 
     connection.query(
-        "UPDATE produit SET Libellé = ?, Description = ?, Images = ?, Prix = ?, Catégorie = ? WHERE ID = ?",
-        [product_name, product_description, image, price, category, id],
+        query,
+        updatedFields,
         (err, results) => {
             if (err) {
-                res.status(500).send("Erreur lors de la modification du produit");
+                res.status(500).json({message: "Erreur lors de la modification du produit"});
             } else {
-                res.status(200).send("Produit modifié avec succès");
+                res.status(200).json({message: "Produit modifié avec succès"});
             }
         }
     );

@@ -7,10 +7,10 @@
     <title>Store</title>
     <!-- Liens CDN pour Bootstrap -->
     <link nonce="<%= nonce %>" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-        rel="stylesheet">
+          rel="stylesheet">
     <!-- Liens CDN pour Materialize -->
     <link nonce="<%= nonce %>" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
-        rel="stylesheet">
+          rel="stylesheet">
     <style nonce="<%= nonce %>">
         /* Ajouter des styles personnalisés ici pour résoudre les conflits */
         .container {
@@ -21,62 +21,109 @@
             margin-top: 20px;
         }
     </style>
-    <% if (typeof info !=='undefined' ) { %>
-        <% locals.token=info.jwt %>
+    <% if (typeof info !== 'undefined' ) { %>
+        <% locals.token = info.jwt %>
 
-            <%} %>
+    <% } %>
 
-                <%- include('./components/navbar') %>
+    <%- include('./components/navbar') %>
 
 
 </head>
 
 <body>
-    <section id="product-details" class="container mt-5">
-        <div class="row">
-            <div class="col-lg-6">
-                <img src="/public/images/<%= product.Images %>" alt="<%= product.Libellé %>"
-                    class="img-fluid rounded mb-10">
-            </div>
-            <div class="col-lg-6">
-                <h2 class="display-5 mb-3">
-                    <%= product.Libellé %>
-                </h2>
-                <p class="lead">Description:</p>
-                <p>
-                    <%= product.Description %>
-                </p>
-                <p class="lead">Prix: <%= product.Prix %> €</p>
-                <p class="lead">Catégorie: <%= product.Catégorie %>
-                </p>
-                <form action="http://localhost:3000/addToCart" method="POST">
-                    <!-- Champs cachés pour stocker les données -->
-                    <% if(locals.user_id) { %>
-                        <input type="hidden" name="user_id" value="<%= user_id %>">
-                        <% } %>
-
-                            <input type="hidden" name="product_id" value="<%= product.ID %>">
-                            <input type="hidden" name="quantity" value="1">
-                            <input type="hidden" name="prix" value="<%= product.Prix %>">
-                            <!-- Par défaut, ajoute une quantité de 1 -->
-
-                            <button type="submit" class="btn btn-primary mt-3">Ajouter au panier</button>
-                </form>
+<section id="product-details" class="container mt-5">
+    <div class="row">
+        <div class="col-lg-6">
+            <img src="/public/images/<%= product.Images %>" alt="<%= product.Libellé %>"
+                 class="img-fluid rounded mb-10">
+        </div>
+        <div class="col-lg-6">
+            <h2 class="display-5 mb-3">
+                <%= product.Libellé %>
+            </h2>
+            <p class="lead">Description:</p>
+            <p>
+                <%= product.Description %>
+            </p>
+            <p class="lead">Prix: <%= product.Prix %> €</p>
+            <p class="lead">Catégorie: <%= product.Catégorie %>
+            </p>
+            <form action="http://localhost:3000/addToCart" method="POST">
+                <!-- Champs cachés pour stocker les données -->
                 <% if(locals.user_id) { %>
-
-                <button id="delete-product-btn" class="btn btn-danger mt-3">Supprimer ce produit</button>
+                    <input type="hidden" name="user_id" value="<%= user_id %>">
                 <% } %>
-                <!-- <a href="#" class="btn btn-primary mt-3">Ajouter au panier</a> -->
+
+                <input type="hidden" name="product_id" value="<%= product.ID %>">
+                <input type="hidden" name="quantity" value="1">
+                <input type="hidden" name="prix" value="<%= product.Prix %>">
+                <!-- Par défaut, ajoute une quantité de 1 -->
+
+                <button type="submit" class="btn btn-primary mt-3">Ajouter au panier</button>
+            </form>
+
+            <% if(locals.user_id) { %>
+                <button type="button" class="btn btn-warning mt-3" data-bs-toggle="modal"
+                        data-bs-target="#editProductModal">
+                    Modifier ce produit
+                </button>
+                <button id="delete-product-btn" class="btn btn-danger mt-3">Supprimer ce produit</button>
+            <% } %>
+            <!-- <a href="#" class="btn btn-primary mt-3">Ajouter au panier</a> -->
+        </div>
+        <!-- Fenêtre modale -->
+        <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editProductModalLabel">Modifier le produit</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="edit-product-form">
+                            <div class="mb-3">
+                                <label for="edit-product-name" class="form-label">Nom du produit</label>
+                                <input type="text" class="form-control" id="edit-product-name"
+                                       value="<%= product.Libellé %>">
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit-product-description" class="form-label">Description</label>
+                                <textarea class="form-control"
+                                          id="edit-product-description"><%= product.Description %></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit-product-price" class="form-label">Prix</label>
+                                <input type="number" class="form-control" id="edit-product-price"
+                                       value="<%= product.Prix %>">
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit-product-category" class="form-label">Catégorie</label>
+                                <input type="text" class="form-control" id="edit-product-category"
+                                       value="<%= product.Catégorie %>">
+                            </div>
+                            <!-- Ajoutez d'autres champs si nécessaire -->
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        <button type="button" class="btn btn-primary" id="save-changes-btn">Enregistrer les
+                            modifications
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 </body>
 
 <!-- Scripts nécessaires pour Bootstrap et Materialize -->
 <script nonce="<%= nonce %>"
-    src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 <script nonce="<%= nonce %>"
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script nonce="<%= nonce %>">
     const products = Array.from(document.querySelectorAll('#products .col-md-4'));
 
@@ -129,23 +176,75 @@
         const deleteProductBtn = document.getElementById('delete-product-btn');
 
         // Ajoute un écouteur d'événement au clic sur le bouton de suppression
-        deleteProductBtn.addEventListener('click', function () {
-            // Effectue une requête DELETE vers le backend pour supprimer le produit
+        deleteProductBtn.addEventListener('click', function (event) {
+            // Demande à l'utilisateur de confirmer la suppression
+            const confirmDelete = confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');
+
+            if (confirmDelete) {
+                // Si l'utilisateur confirme la suppression, effectue une requête DELETE vers le backend pour supprimer le produit
+                fetch('http://localhost:5000/products/' + productId, {
+                    method: 'DELETE'
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Si la suppression est réussie, redirige vers la page d'accueil par exemple
+                            window.location.href = '/';
+                        } else {
+                            // Sinon, affichez un message d'erreur
+                            console.error(data.message);
+                        }
+                    })
+                    .catch(error => console.error('Erreur lors de la suppression du produit :', error));
+            }
+
+            // Empêche le formulaire d'être soumis normalement
+            event.preventDefault();
+        });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        // Récupère l'ID du produit
+        const productId = "<%= product.ID %>";
+
+        // Récupère le bouton pour enregistrer les modifications
+        const saveChangesBtn = document.getElementById('save-changes-btn');
+
+        // Ajoute un écouteur d'événement au clic sur le bouton pour enregistrer les modifications
+        saveChangesBtn.addEventListener('click', function () {
+            // Récupère les nouvelles valeurs des champs du formulaire
+            const newName = document.getElementById('edit-product-name').value;
+            const newDescription = document.getElementById('edit-product-description').value;
+            const newPrice = document.getElementById('edit-product-price').value;
+            const newCategory = document.getElementById('edit-product-category').value;
+
+            // Create an object to hold the updated fields
+            const updatedFields = {};
+
+            // Check if the fields have been modified before adding them to the updatedFields object
+            if (newName !== "") updatedFields.name = newName;
+            if (newDescription !== "") updatedFields.description = newDescription;
+            if (newPrice !== "") updatedFields.price = newPrice;
+            if (newCategory !== "") updatedFields.category = newCategory;
+
+            // Effectue une requête PUT vers le backend pour modifier le produit
             fetch('http://localhost:5000/products/' + productId, {
-                method: 'DELETE'
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedFields),
             })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Si la suppression est réussie, redirige vers la page d'accueil par exemple
-                        window.location.href = '/';
+                        // Si la modification est réussie, recharge la page pour afficher les nouvelles informations du produit
+                        location.reload();
                     } else {
                         // Sinon, affichez un message d'erreur
                         console.error(data.message);
                     }
                 })
-                .catch(error => console.error('Erreur lors de la suppression du produit :', error));
-
+                .catch(error => console.error('Erreur lors de la modification du produit :', error));
         });
     });
 </script>
