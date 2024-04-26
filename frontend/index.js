@@ -508,7 +508,7 @@ app.post("/addToCart", async (req, res) => {
 
     if(!token)
     {
-        return res.render("panier.ejs",{ produitsPanier: req.session.cart });
+        return res.render("panier.ejs",{ produitsPanier: req.session.cart,nonce : req.nonce });
     }
   
     try {
@@ -537,7 +537,7 @@ app.post("/addToCart", async (req, res) => {
       console.log("Panier du gamin :", user_panier);
   
       // Rendre la page panier.ejs avec les produits du panier
-      res.render("panier.ejs", { produitsPanier: user_panier });
+      res.render("panier.ejs", { produitsPanier: user_panier , nonce : req.nonce});
   
     } catch (err) {
       console.error("Erreur lors de la vérification du jeton JWT:");
