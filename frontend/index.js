@@ -34,20 +34,30 @@ app.use(expressCspHeader({
         'style-src': [SELF,NONCE,UNSAFE_INLINE,INLINE, 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css'
         ,'https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css']
     },
+   
     generateNonce: true,  // Active la génération de nonce
-    reportUri: 'https://cspreport.com/send',
-    reportTo: [
-        {
-            group: 'my-report-group',
-            max_age: 30 * 60,
-            endpoints: [{ url: 'https://cspreport.com/send'}],
-            include_subdomains: true
-        },
-    ]
+    
+    
 }));
-
+// Middleware pour ajouter l'en-tête Content-Security-Policy
+app.use((req, res, next) => {
+    res.setHeader('Reporting-Endpoints', 'default="http://localhost:3000/report-violation"');
+    next();
+  });
 // Middleware pour servir les fichiers statiques
 app.use(express.static("public"));
+app.post('/report-violation',express.json(), (req, res) => {
+    if (req.body) {
+        
+        console.log('CSP Violation: ', req.body);
+        res.status(204).end();
+    } else {
+        console.log('CSP Violation: No data received!');
+        res.status(400).send('No data received'); 
+    }
+   // res.status(204).end(); // Renvoyer une réponse sans contenu
+});
+
 app.use('/public/images', express.static('public/images'));
 // Configuration de Multer
 const storage = multer.diskStorage({
@@ -63,6 +73,8 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({storage: storage});
+
+
 app.get("/", async (req, res) => {
     try {
         const productsResponse = await axios.get("http://localhost:5000/products");
