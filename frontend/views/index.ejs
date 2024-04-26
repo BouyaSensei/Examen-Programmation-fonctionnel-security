@@ -58,7 +58,7 @@
 
 <!-- ajout d'un + au cas ou utilisateur connecter pour ajouter produit -->
 <% if (locals.token) { %>
-    <div class="d-flex justify-content-center align-items-center" style="height: 10vh;">
+    <div class="d-flex justify-content-center align-items-center"  nonce="<%= nonce %>" style ="height: 10vh;">
         <a class="plus-sign" href="/addProduct">+</a>
     </div>
 <% } %>

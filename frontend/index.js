@@ -168,13 +168,14 @@ app.get("/register", (req, res) => {
 
     const secret = tokens.secretSync();
     const token = tokens.create(secret);
+    
     // Je stocke le token csrf dans un cookie
     res.cookie("csrfToken", token, { httpOnly: true });
     
     const errorMessage = req.query.error; // Vérifie si une erreur est passée en tant que paramètre GET
 
     // Rendre la page d'inscription en transmettant le token csrf et éventuellement le message d'erreur
-    res.render("register.ejs", { csrfToken: token, errorMessage });
+    res.render("register.ejs", { csrfToken: token, nonce : req.nonce, errorMessage });
 
 });
 
@@ -198,7 +199,8 @@ app.post("/register", async (req, res) => {
         res.cookie("csrfToken", token, { httpOnly: true });
         return res.render("register.ejs", {
             csrfToken: token,
-            errorMessage: "Veuillez saisir un identifiant."
+            errorMessage: "Veuillez saisir un identifiant.",
+            nonce : req.nonce
         });
     }
 
@@ -208,7 +210,8 @@ app.post("/register", async (req, res) => {
         res.cookie("csrfToken", token, { httpOnly: true });
         return res.render("register.ejs", {
             csrfToken: token,
-            errorMessage: "Mot de passe incorrect. Il doit contenir au moins une majuscule, un caractère spécial et avoir une longueur d'au moins 8 caractères."
+            errorMessage: "Mot de passe incorrect. Il doit contenir au moins une majuscule, un caractère spécial et avoir une longueur d'au moins 8 caractères.",
+            nonce : req.nonce
         });
     }
 
