@@ -15,6 +15,28 @@ const cartRoutes = require("./routes/cartRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const statsRoutes = require("./routes/statsRoutes");
 
+// Importation de Swagger
+const swaggerJsDoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+
+// Options pour la documentation Swagger
+const swaggerOptions = {
+    swaggerDefinition: {
+        info: {
+            title: "API de mon application",
+            description: "Documentation de l'API",
+            contact: {
+                name: "Support technique",
+            },
+            servers: ["http://localhost:3000"],
+        },
+    },
+    // Chemin vers les fichiers contenant la documentation Swagger
+    apis: ["./routes/*.js", "./controllers/*.js"],
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+
 // Importation des middlewares
 const csrfErrorMiddleware = require('./middlewares/crsfErrorMiddleware');
 
@@ -63,6 +85,9 @@ app.use(productRoutes);
 app.use(cartRoutes);
 app.use(categoryRoutes);
 app.use(statsRoutes);
+
+// Utilisation de Swagger
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Gestion des erreurs CSRF
 app.use(csrfErrorMiddleware);
