@@ -52,32 +52,74 @@ app.get("/", async (req, res) => {
         
         const csrf_token = tokens.create(secret);
        
-        
-        if(req.cookies.toast && req.cookies.jwt){
-           
-            const info = {
-                jwt: req.cookies.jwt,
-                toast : req.cookies.toast,
-                csrfToken: token,
-                categories: categoriesResponse.data,
+        jwt.verify(token, 'secret', async (err, decoded) => {
+            if (err) {
+            //   console.error("Erreur lors de la vérification du jeton JWT:", err);
+            //   return res.status(401).json({ status: 'Erreur', message: 'Jeton inconnu' });
+              return res.render("index.ejs", {
                 products: productsResponse.data,
+                categories: categoriesResponse.data,
+                token: token,
+                csrfToken : csrf_token,
+                
+              }
+              
+              
+              );
+
             }
+      
+            // Extraire le nom d'utilisateur du token décodé
+            const username = decoded.name;
+            // console.log("Nom d'utilisateur extrait du jeton JWT:", decoded);
+      
+            // Effectuer une requête vers le backend pour récupérer l'ID de l'utilisateur
+            try {
+              const userResponse = await axios.get('http://localhost:5000/getUserID', {
+                params: {
+                  username: username
+                }
+              });
+              const user_id = userResponse.data.user_id;
+              console.log("ID de l'utilisateur actuelle récupéré:", user_id);
+      
+              if(req.cookies.toast && req.cookies.jwt){
            
-             
-            return res.render("index.ejs", req.cookies.jwt ?  {info}  : null);
+                const info = {
+                    jwt: req.cookies.jwt,
+                    toast : req.cookies.toast,
+                    csrfToken: token,
+                    categories: categoriesResponse.data,
+                    products: productsResponse.data,
+                    user_id: user_id
+                }
+               
+                 
+                return res.render("index.ejs", req.cookies.jwt ?  {info}  : null);
+            
+               }
+               if(!req.cookies.toast){
+                res.cookie("toast", { type: "", message: "" }, { httpOnly: true });
+            }
+            res.render('index.ejs', {
+                products: productsResponse.data,
+                categories: categoriesResponse.data,
+                token: token,
+                csrfToken : csrf_token,
+                user_id: user_id
+            });
+
+
+            } catch (error) {
+              console.error("Erreur lors de la récupération de l'ID de l'utilisateur:");
         
-           }
-           if(!req.cookies.toast){
-            res.cookie("toast", { type: "", message: "" }, { httpOnly: true });
-        }
-        res.render('index.ejs', {
-            products: productsResponse.data,
-            categories: categoriesResponse.data,
-            token: token,
-            csrfToken : csrf_token
-        });
+            }
+          });
+
+
+
     } catch (error) {
-        console.error(error);
+        // console.error(error);
         res.status(500).send("An error occurred");
     }
 
@@ -142,7 +184,6 @@ app.all("/login", async (req, res) => {
         const secret = tokens.secretSync();
         const token = tokens.create(secret);
         res.cookie("toast", {type: "", message: ""}, {httpOnly: true});
-        console.log(req.cookies);
         //console.log('oki');
         //declaration des toast pou affichage de message selon circonstance
         //req.session.toast  ? req.session.toast : { type: "", message: "" }
@@ -187,12 +228,67 @@ app.all("/login", async (req, res) => {
                 const token = jwt.sign({name}, "secret");
                 res.cookie("jwt", token, {httpOnly: true});
 
+                jwt.verify(token, 'secret', async (err, decoded) => {
+                    if (err) {
+                      console.error("Erreur lors de la vérification du jeton JWT:", err);
+                      return res.status(401).json({ status: 'Erreur', message: 'Jeton inconnu' });
+                    }
+              
+                    // Extraire le nom d'utilisateur du token décodé
+                    const username = decoded.name;
+                    // console.log("Nom d'utilisateur extrait du jeton JWT:", decoded);
+              
+                    // Effectuer une requête vers le backend pour récupérer l'ID de l'utilisateur
+                    try {
+                      const userResponse = await axios.get('http://localhost:5000/getUserID', {
+                        params: {
+                          username: username
+                        }
+                      });
+                      const user_id = userResponse.data.user_id;
+                      console.log("ID de l'utilisateur récupéré apres connexion:", user_id);
+              
+                      if(req.session.cart && req.session.cart.length > 0 )
+                      {
+                          req.session.cart.forEach(async function (element) {
+          
+                              
+                              try {
+                                  // Effectuer une requête pour ajouter le produit au panier
+                                  const response = await axios.post('http://localhost:5000/addToCart', { user_id : user_id, product_id : element["ID"], quantity : element["quantity"] });
+                              
+                                  // Vérifier si l'ajout au panier a réussi
+                                  if (response.data.success) {
+                              
+                                    res.redirect("/panier");
+                              
+                                  } else {
+                                    // Sinon, afficher un message d'erreur
+                                    console.error('Erreur lors de l\'ajout du produit au panier apres etre connecter :');
+                                    // Vous pouvez gérer l'affichage de l'erreur comme vous le souhaitez ici
+                                  }
+                                } catch (error) {
+                                  console.error('Erreur lors de l\'ajout du produit au panier apres connexion :');
+                                  // Vous pouvez également afficher un message d'erreur en cas d'échec de la requête
+                                }
+      
+                            });
+      
+                      }
+        
+        
+                    } catch (error) {
+                      console.error("Erreur lors de la récupération de l'ID de l'utilisateur:", error);
+                
+                    }
+                  });
+                // Verifier si req.session.cart existe et si oui "transferer le panier"
+        
                 return res.redirect("/dashboard");
             })
             .catch((err) => {
                 req.cookies.toast.type = "error";
                 req.cookies.toast.message = "Erreur  de connexion  utilisateur ! Veuillez réessayer ! ";
-                console.log(req.cookies.toast);
                 const info = {
                     csrfToken: req.cookies.csrfToken,
                     toast: req.cookies.toast
@@ -291,7 +387,7 @@ app.get("/product/:id", async (req, res) => {
 
         });
     } catch (error) {
-        console.error(error);
+        // console.error(error);
         res.status(500).send("An error occurred while fetching the product");
     }
 });
@@ -315,7 +411,7 @@ app.get('/stats', async (req, res) => {
        
         res.send(response.data);
     } catch (error) {
-        console.error(error);
+        // console.error(error);
         res.status(500).send('An error occurred');
 
     }
@@ -334,6 +430,96 @@ app.get("/addProduct", (req, res) => {
   res.render("addProduct.ejs", { token: req.cookies.jwt, csrfToken: token });
 
 });
+
+
+app.post("/addToCart", async (req, res) => {
+    const { user_id, product_id, quantity } = req.body;
+    console.log(user_id);
+    if(!user_id)
+    {
+        const response = await axios.post('http://localhost:5000/getLibelle', { product_id });
+        
+        if (response.data.success) {
+            const libelleName = response.data.libelle;
+
+            req.session.cart = [
+                ...req.session.cart ?? [],
+                {
+    
+                    ID: product_id,
+                    Libellé: libelleName,
+                    quantity: quantity
+                }
+               ];
+            return res.redirect("/panier");
+        }
+        
+    }
+    
+    try {
+      // Effectuer une requête pour ajouter le produit au panier
+      const response = await axios.post('http://localhost:5000/addToCart', { user_id, product_id, quantity });
+  
+      // Vérifier si l'ajout au panier a réussi
+      if (response.data.success) {
+  
+        res.redirect("/panier");
+  
+      } else {
+        // Sinon, afficher un message d'erreur
+        console.error('Erreur lors de l\'ajout du produit au panier:');
+        // Vous pouvez gérer l'affichage de l'erreur comme vous le souhaitez ici
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout du produit au panier:');
+      // Vous pouvez également afficher un message d'erreur en cas d'échec de la requête
+    }
+  });
+  
+  // Afficher le panier
+  app.get("/panier", async (req, res) => {
+    const token = req.cookies.jwt;
+
+    if(!token)
+    {
+        return res.render("panier.ejs",{ produitsPanier: req.session.cart });
+    }
+  
+    try {
+      // Vérifier le token JWT pour récupérer les informations d'identification de l'utilisateur
+      const decoded = jwt.verify(token, 'secret');
+  
+      // Extraire le nom d'utilisateur du token décodé
+      const username = decoded.name;
+  
+      // Effectuer une requête vers le backend pour récupérer l'ID de l'utilisateur
+      const userResponse = await axios.get('http://localhost:5000/getUserID', {
+        params: {
+          username: username
+        }
+      });
+      const user_id = userResponse.data.user_id;
+      console.log("ID de l'utilisateur récupéré pour panier :", user_id);
+  
+      // Maintenant que vous avez l'ID de l'utilisateur, vous pouvez récupérer son panier depuis la base de données
+      const userPanier = await axios.get('http://localhost:5000/getPanier', {
+        params: {
+          username: username
+        }
+      });
+      const user_panier = userPanier.data;
+      console.log("Panier du gamin :", user_panier);
+  
+      // Rendre la page panier.ejs avec les produits du panier
+      res.render("panier.ejs", { produitsPanier: user_panier });
+  
+    } catch (err) {
+      console.error("Erreur lors de la vérification du jeton JWT:");
+      res.status(401).json({ status: 'Erreur', message: 'Jeton inconnu' });
+    }
+  });
+
+
 // gestion des erreurs CSRF
 
 app.use(function (err, req, res, next) {

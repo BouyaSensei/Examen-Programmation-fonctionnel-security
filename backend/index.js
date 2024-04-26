@@ -44,7 +44,7 @@ app.post("/register", async (req, res) => {
     [name, hashedPassword],
     (err, results) => {
       if (err) {
-        console.log(err);
+        // console.log(err);
         res
           .status(500)
           .send("Erreur lors de l'enregistrement de l'utilisateur");
@@ -106,7 +106,7 @@ app.put("/product/:id", (req, res) => {
     [product_name, product_description, image, price, category, id],
     (err, results) => {
       if (err) {
-        console.log(err);
+        // console.log(err);
         res.status(500).send("Erreur lors de la modification du produit");
       } else {
         res.status(200).send("Produit modifié avec succès");
@@ -132,7 +132,7 @@ app.all("/products", (req, res) => {
       [product_name, product_description, image, price, category], // Assurez-vous que 'image' contient seulement le nom de fichier
       (err, results) => {
         if (err) {
-          console.log(err);
+          // console.log(err);
           res.status(500).send("Erreur lors de l'ajout du produit");
         } else {
           res.status(200).send("Produit ajouté avec succès");
@@ -177,6 +177,132 @@ app.get("/categories", (req, res) => {
     }
   });
 });
+
+app.post("/addToCart", (req, res) => {
+  const { user_id, product_id, quantity } = req.body;
+  console.log("Données reçues pour ajout au panier : ", req.body);
+
+  
+  
+  connection.query(
+    'INSERT INTO panier (user_id, product_id, quantity) VALUES (?, ?, ?)',
+    [user_id, product_id, quantity],
+    (err, results) => {
+      
+      if (err) {
+        // console.log(err);
+        res.status(500).send("Erreur lors de l'ajout du produit au panier");
+      } else {
+        // res.status(200).send("Produit ajouté au panier avec succès");
+        res.json({ success: true, message: 'Produit ajouté au panier avec succès',  });
+
+      }
+    }
+    
+  );
+});
+
+
+
+  app.get('/getUserID', (req, res) => {
+    const username = req.query.username;
+    // console.log("Nom d'utilisateur reçu pour récupérer l'ID :", username);
+  
+    // Effectuer une requête à la base de données pour récupérer l'ID de l'utilisateur
+    connection.query(
+      'SELECT ID FROM utilisateurs WHERE Username = ?',
+      [username],
+      (error, results) => {
+        if (error) {
+          console.error("Erreur lors de la récupération de l'ID de l'utilisateur:", error);
+          res.status(500).json({ error: "Erreur lors de la récupération de l'ID de l'utilisateur" });
+        } else {
+          // Renvoyer l'ID de l'utilisateur
+          if (results.length > 0) {
+            // console.log("ID de l'utilisateur récupéré avec succès :", results[0].ID);
+            res.status(200).json({ user_id: results[0].ID });
+          } else {
+            console.error("Utilisateur non trouvé");
+            res.status(404).json({ error: "Utilisateur non trouvé" });
+          }
+        }
+      }
+    );
+  });
+  
+
+  app.post('/getLibelle', (req,res) => {
+    const { product_id } = req.body;
+    console.log("Id produit" , product_id);
+    // console.log("Nom d'utilisateur reçu pour récupérer l'ID :", username);
+  
+    // Effectuer une requête à la base de données pour récupérer l'ID de l'utilisateur
+    connection.query(
+      'SELECT Libellé FROM produit WHERE ID = ?',
+      [product_id],
+      (error, results) => {
+        if (error) {
+          console.error("Erreur lors de la récupération du libelle:", error);
+          res.status(500).json({ error: "Erreur lors de la récupération du libelle" });
+        } else {
+          // Renvoyer l'ID de l'utilisateur
+          if (results.length > 0) {
+            console.log("Nom du produit récupéré avec succès :", results[0].Libellé);
+            res.status(200).json({ libelle : results[0].Libellé , success: true });
+            
+          } else {
+            console.error("Utilisateur non trouvé");
+            res.status(404).json({ error: "Utilisateur non trouvé" });
+          }
+        }
+      }
+    );
+
+
+  })
+  
+// Route pour récupérer les informations du panier de l'utilisateur
+app.get("/getPanier", async (req, res) => {
+  const { username } = req.query;
+
+  try {
+    console.log("Nom d'utilisateur reçu pour récupérer le panier :", username);
+
+    // Requête pour récupérer l'ID de l'utilisateur à partir de son nom d'utilisateur
+    connection.query('SELECT ID FROM utilisateurs WHERE Username = ?', [username], async (err, userResults) => {
+      if (err) {
+        console.error('Erreur lors de la récupération de l\'ID de l\'utilisateur:', err);
+        res.status(500).send('Erreur lors de la récupération de l\'ID de l\'utilisateur');
+      } else {
+        // Si l'utilisateur est trouvé
+        if (userResults.length > 0) {
+          const user_id = userResults[0].ID;
+          console.log("ID de l'utilisateur récupéré pour récupérer le panier :", user_id);
+
+          // Maintenant que vous avez l'ID de l'utilisateur, vous pouvez récupérer son panier depuis la base de données
+          connection.query('SELECT p.ID, p.product_id, p.quantity, pr.Libellé FROM panier p JOIN produit pr ON p.product_id = pr.ID WHERE p.user_id = ?', [user_id], (panierErr, panierResults) => {
+            if (panierErr) {
+              console.error('Erreur lors de la récupération du panier:');
+              res.status(500).send('Erreur lors de la récupération du panier');
+            } else {
+              console.log("Produits du panier récupérés avec succès :", panierResults);
+              // Envoyer les produits du panier au frontend
+              res.status(200).json(panierResults);
+            }
+          });
+        } else {
+          console.error('Utilisateur non trouvé');
+          res.status(404).send('Utilisateur non trouvé');
+        }
+      }
+    });
+  } catch (err) {
+    console.error('Erreur lors de la récupération du panier:');
+    res.status(500).send('Erreur lors de la récupération du panier');
+  }
+});
+
+
 app.listen(5000, () => {
   console.log("Serveur démarré sur http://localhost:5000");
 });

@@ -1,0 +1,70 @@
+<!-- panier.ejs -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Votre Panier</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    tr:hover {
+      background-color: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Votre Panier</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Produit</th>
+          <th>Quantité</th>
+        </tr>
+      </thead>
+<!-- panier.ejs -->
+<tbody>
+  <% produitsPanier.forEach(produit => { %>
+      <tr>
+          <td><%= produit.ID %></td>
+          <td><%= produit.Libellé %></td>
+          <td><%= produit.quantity %></td>
+      </tr>
+  <% }); %>
+</tbody>
+
+    </table>
+
+    <a href="/">Accueil</a>
+
+  </div>
+</body>
+</html>

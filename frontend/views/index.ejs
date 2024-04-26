@@ -129,6 +129,17 @@
                                     <p class="card-text"><%= product.Description %></p>
                                     <p class="card-text"><%= product.Prix %> €</p>
                                     <p class="card-category d-none"><%= product.Catégorie %></p>
+                                        <form action="http://localhost:3000/addToCart" method="POST">
+                                            <!-- Champs cachés pour stocker les données -->
+                                            <% if(locals.user_id) { %>
+                                              <input type="hidden" name="user_id" value="<%= user_id %>">
+                                              <% } %>
+
+                                              <input type="hidden" name="product_id" value="<%= product.ID %>">
+                                              <input type="hidden" name="quantity" value="1"> <!-- Par défaut, ajoute une quantité de 1 -->
+                                              
+                                              <button type="submit" class="btn btn-primary">Ajouter au panier</button>
+                                        </form>
                                     <a href="/product/<%= product.ID %>" class="btn btn-primary">Voir plus</a>
                                 </div>
                             </div>
