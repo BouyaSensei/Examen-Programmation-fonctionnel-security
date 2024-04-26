@@ -233,7 +233,11 @@ app.post("/register", async (req, res) => {
             return res.redirect("/login");
         })
         .catch((err) => {
-            res.status(500).send("Erreur lors de l'enregistrement de l'utilisateur");
+         //onsole.log(err.response.data);
+
+              res.status(500).send(err.response.data);
+
+
         });
 });
 
