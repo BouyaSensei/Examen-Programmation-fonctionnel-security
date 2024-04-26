@@ -48,23 +48,32 @@
           <th>#</th>
           <th>Produit</th>
           <th>Quantité</th>
+          <th>Prix</th>
         </tr>
       </thead>
-<!-- panier.ejs -->
-<tbody>
-  <% produitsPanier.forEach(produit => { %>
-      <tr>
-          <td><%= produit.ID %></td>
-          <td><%= produit.Libellé %></td>
-          <td><%= produit.quantity %></td>
-      </tr>
-  <% }); %>
-</tbody>
-
+      <tbody>
+        <% if (produitsPanier && produitsPanier.length > 0) { %>
+          <% produitsPanier.forEach(produit => { %>
+            <tr>
+              <td><%= produit.ID %></td>
+              <td><%= produit.Libellé %></td>
+              <td><%= produit.quantity %></td>
+              <td><%= produit.prix %>€</td>
+            </tr>
+          <% }); %>
+        <% } else { %>
+          <tr>
+            <td colspan="3">Aucun Article a votre panier</td>
+          </tr>
+        <% } %>
+      </tbody>
     </table>
-
     <a href="/">Accueil</a>
-
   </div>
 </body>
 </html>
+
+<!-- Ajout de scripts pour les logs -->
+<script>
+  console.log("Contenu du panier actuel : ", <%= JSON.stringify(produitsPanier) %>);
+</script>
