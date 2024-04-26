@@ -3,38 +3,36 @@ const express = require("express");
 const mysql = require("mysql");
 const bcrypt = require("bcrypt");
 const cors = require("cors");
-
-/**
- * Creates an instance of the Express application.
- *
- * @returns {Object} The Express application instance.
- */
 const app = express();
 
-app.use(express.json());
-app.use(cors({
-    origin: ["http://localhost:3000"],
-    methods: ["GET", "POST", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-    optionsSuccessStatus: 200
-}));
+app.use(express.json()); // Pour supporter les corps JSON
+
+app.use(
+    cors({
+        origin: "http://localhost:3000",
+        methods: ["GET", "POST", "PUT", "DELETE"], // Inclure la méthode DELETE
+        allowedHeaders: ["Content-Type", "Authorization"],
+        credentials: true,
+        optionsSuccessStatus: 200,
+    })
+);
 
 
+// Connexion à MySQL
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
-    database: process.env.DB_NAME
+    database: process.env.DB_NAME,
 });
 
-connection.connect(error => {
-    if (error) {
-        console.error("Erreur de connexion: " + error.message);
-        return;
+connection.connect((err) => {
+    if (err) {
+        return console.error("Erreur de connexion: " + err.message);
     }
     console.log("Connecté au serveur MySQL");
 });
+
 
 app.post("/register", async (req, res) => {
     const {name, password} = req.body;
