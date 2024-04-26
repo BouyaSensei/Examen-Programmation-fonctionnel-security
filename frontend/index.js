@@ -107,7 +107,7 @@ app.post("/register", async (req, res) => {
 
     const { name, password } = req.body;
     const passwordRegexUpperCase = /^(?=.*[A-Z])/; // Au moins une majuscule
-    const passwordRegexSpecialChar = /^(?=.*[@$!%*?&.()])/; // Au moins un caractère spécial
+    const passwordRegexSpecialChar = /^(?=.*[@$!%*?&.()\\[\]{}<>^=+-_~|:;,])/; // Au moins un caractère spécial
     const passwordMinLength = /^(?=.{8,})/; // Au moins 8 caractères
 
     if (!name || name.trim() === "") { // Vérification de la présence de l'indentifiant
