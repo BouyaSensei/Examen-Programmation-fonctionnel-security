@@ -8,6 +8,7 @@ const multer = require("multer");
 const path = require("path");
 const session = require('express-session');
 const cookieParser = require("cookie-parser"); // pour gérer les cookies
+const  bodyParser = require('body-parser');
 const { expressCspHeader, NONCE, SELF, UNSAFE_INLINE,INLINE} = require('express-csp-header');
 const app = express();
 
@@ -32,7 +33,8 @@ app.use(expressCspHeader({
         'script-src': [SELF,NONCE,UNSAFE_INLINE,INLINE,'https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js',
         'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'],
         'style-src': [SELF,NONCE,UNSAFE_INLINE,INLINE, 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css'
-        ,'https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css']
+        ,'https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css'],
+        'report-uri': 'http://localhost:3000/report-violation'
     },
    
     generateNonce: true,  // Active la génération de nonce
@@ -46,7 +48,7 @@ app.use((req, res, next) => {
   });
 // Middleware pour servir les fichiers statiques
 app.use(express.static("public"));
-app.post('/report-violation',express.json(), (req, res) => {
+app.post('/report-violation',express.json({type: 'application/csp-report'}) , (req, res) => {
     if (req.body) {
         
         console.log('CSP Violation: ', req.body);
