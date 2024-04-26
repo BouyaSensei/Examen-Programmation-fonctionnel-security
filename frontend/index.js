@@ -191,6 +191,7 @@ app.post("/register", async (req, res) => {
     const { name, password } = req.body;
     const passwordRegexUpperCase = /^(?=.*[A-Z])/; // Au moins une majuscule
     const passwordRegexSpecialChar = /^(?=.*[@$!%*?&.()\\[\]{}<>^=+-_~|:;,])/; // Au moins un caractère spécial
+    const passwordRegexChiffre = /^(?=.*[0123456789])/; // Au moins un caractère spécial
     const passwordMinLength = /^(?=.{8,})/; // Au moins 8 caractères
 
     if (!name || name.trim() === "") { // Vérification de la présence de l'indentifiant
@@ -204,7 +205,7 @@ app.post("/register", async (req, res) => {
         });
     }
 
-    if (!passwordRegexUpperCase.test(password) || !passwordRegexSpecialChar.test(password) || !passwordMinLength.test(password)) { // Vérification pour le mdp 
+    if (!passwordRegexUpperCase.test(password) || !passwordRegexSpecialChar.test(password) || !passwordMinLength.test(password) || !passwordRegexChiffre.test(password)) { // Vérification pour le mdp 
         const secret = tokens.secretSync();
         const token = tokens.create(secret);
         res.cookie("csrfToken", token, { httpOnly: true });
