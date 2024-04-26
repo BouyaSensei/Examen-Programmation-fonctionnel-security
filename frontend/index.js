@@ -228,9 +228,11 @@ app.post("/register", async (req, res) => {
             return res.redirect("/login");
         })
         .catch((err) => {
-         //onsole.log(err.response.data);
 
-              res.status(500).send(err.response.data);
+          
+                res.status(500).send(err.response.data);
+            
+
 
 
         });

@@ -40,20 +40,31 @@ app.post("/register", async (req, res) => {
   // on hash le password pour le stocker en base de données
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  connection.query(
-    "INSERT INTO utilisateurs (Username, Password) VALUES (?, ?)",
-    [name, hashedPassword],
-    (err, results) => {
-      if (err) {
-        // console.log(err);
-        res
-          .status(500)
-          .send("Erreur lors de l'enregistrement de l'utilisateur");
-      } else {
-        res.status(200).send("Utilisateur enregistré avec succès");
+  connection.query("SELECT * FROM utilisateurs WHERE Username = ?", [name], (err, results) => {
+    if (err) {
+      res.status(500).send("Erreur lors de la vérification de l'utilisateur");
+    } else {
+
+      if (results.length > 0 && results[0]['Username'] === name) {
+       return res.status(403).send("Nom d'utilisateur déjà utilisé");
       }
+      connection.query(
+          "INSERT INTO utilisateurs (Username, Password) VALUES (?, ?)",
+          [name, hashedPassword],
+          (err, results) => {
+            if (err) {
+              // console.log(err);
+              res
+                  .status(500)
+                  .send("Erreur lors de l'enregistrement de l'utilisateur");
+            } else {
+              res.status(200).send("Utilisateur enregistré avec succès");
+            }
+          }
+      );
     }
-  );
+  });
+
 });
 app.post("/login", async (req, res) => {
   const { name, password } = req.body;
