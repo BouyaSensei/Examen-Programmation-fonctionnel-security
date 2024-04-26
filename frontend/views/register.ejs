@@ -23,7 +23,7 @@
                     <div class="card-content">
                         <span class="card-title">Inscription</span>
                         <form action="/register" method="post">
-                            <% if (errorMessage) { %> <!-- Condition pour afficher la balise h1 si errorMessage existe -->
+                            <% if (errorMessage) { %> <!-- Affiche le message d'erreur s'il existe -->
                                 <p class="error-message"><%= errorMessage %></p>
                             <% } %>
                             <!-- Autres champs du formulaire -->
