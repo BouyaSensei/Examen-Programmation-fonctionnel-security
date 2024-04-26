@@ -86,50 +86,69 @@ app.get("/", async (req, res) => {
 // Route pour aller sur la wiews pour enregistrer un utilisateur
 app.get("/register", (req, res) => {
     const secret = tokens.secretSync();
-
     const token = tokens.create(secret);
+    // Je stocke le token csrf dans un cookie
+    res.cookie("csrfToken", token, { httpOnly: true });
+    
+    const errorMessage = req.query.error; // Vérifie si une erreur est passée en tant que paramètre GET
 
-    //je stocke le token csrf dans un cookie
-    res.cookie("csrfToken", token, {httpOnly: true});
-
-    res.render("register.ejs", {csrfToken: token});
+    // Rendre la page d'inscription en transmettant le token csrf et éventuellement le message d'erreur
+    res.render("register.ejs", { csrfToken: token, errorMessage });
 });
 
-// Route pour enregistrer un utilisateur
 app.post("/register", async (req, res) => {
+    const csrfToken = req.cookies.csrfToken;
+    
+    // Vérification du token csrf
+    if (csrfToken !== req.body._csrf) {
+        res.status(403).send("Jeton CSRF invalide");
+        return;
+    }
 
-  //je récupère le token csrf dans le cookie
-  const csrfToken = req.cookies.csrfToken;
-  //je vérifie que le token csrf est valide
+    const { name, password } = req.body;
+    const passwordRegexUpperCase = /^(?=.*[A-Z])/; // Au moins une majuscule
+    const passwordRegexSpecialChar = /^(?=.*[@$!%*?&.()])/; // Au moins un caractère spécial
+    const passwordMinLength = /^(?=.{8,})/; // Au moins 8 caractères
 
-  //console.log(tokens.verify(csrfToken,req.body._csrf));
-  if (csrfToken !== req.body._csrf) {
-    res.status(403).send("Jeton CSRF invalide");
-    return;
-  }
+    if (!name || name.trim() === "") { // Vérification de la présence de l'indentifiant
+        const secret = tokens.secretSync();
+        const token = tokens.create(secret);
+        res.cookie("csrfToken", token, { httpOnly: true });
+        return res.render("register.ejs", {
+            csrfToken: token,
+            errorMessage: "Veuillez saisir un identifiant."
+        });
+    }
 
-  const { name, password } = req.body;
+    if (!passwordRegexUpperCase.test(password) || !passwordRegexSpecialChar.test(password) || !passwordMinLength.test(password)) { // Vérification pour le mdp 
+        const secret = tokens.secretSync();
+        const token = tokens.create(secret);
+        res.cookie("csrfToken", token, { httpOnly: true });
+        return res.render("register.ejs", {
+            csrfToken: token,
+            errorMessage: "Mot de passe incorrect. Il doit contenir au moins une majuscule, un caractère spécial et avoir une longueur d'au moins 8 caractères."
+        });
+    }
 
-  //j'envoi les données de l'utilisateur à l'API server
+    //j'envoie les données de l'utilisateur à l'API server
+    await axios
+        .post(
+            "http://localhost:5000/register",
+            { name, password },
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        )
+        .then((response) => {
+            //res.send('Utilisateur enregistré avec succès');
 
-  await axios
-    .post(
-      "http://localhost:5000/register",
-      { name, password },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    )
-    .then((response) => {
-      //res.send('Utilisateur enregistré avec succès');
-
-      return res.redirect("/login");
-    })
-    .catch((err) => {
-      res.status(500).send("Erreur lors de l'enregistrement de l'utilisateur");
-    });
+            return res.redirect("/login");
+        })
+        .catch((err) => {
+            res.status(500).send("Erreur lors de l'enregistrement de l'utilisateur");
+        });
 });
 
 
