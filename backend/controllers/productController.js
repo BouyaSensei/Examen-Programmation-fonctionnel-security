@@ -1,0 +1,121 @@
+const db = require('../config/db');
+const connection = db;
+
+exports.getProductById = (req, res) => {
+    const {id} = req.params;
+    connection.query(
+        "SELECT * FROM produit WHERE ID = ?",
+        [id],
+        (err, results) => {
+            if (err) {
+                res.status(500).send("Erreur lors de la récupération du produit");
+            } else {
+                if (results.length > 0) {
+                    res.status(200).json(results[0]);
+                } else {
+                    res.status(404).send("Produit non trouvé");
+                }
+            }
+        }
+    );
+};
+
+exports.updateProduct = (req, res) => {
+    const {id} = req.params;
+    const {product_name, product_description, price, category, image} = req.body;
+
+    connection.query(
+        "UPDATE produit SET Libellé = ?, Description = ?, Images = ?, Prix = ?, Catégorie = ? WHERE ID = ?",
+        [product_name, product_description, image, price, category, id],
+        (err, results) => {
+            if (err) {
+                res.status(500).send("Erreur lors de la modification du produit");
+            } else {
+                res.status(200).send("Produit modifié avec succès");
+            }
+        }
+    );
+};
+
+exports.getAllProducts = (req, res) => {
+    connection.query("SELECT * FROM produit", (err, results) => {
+        if (err) {
+            res.status(500).send("Erreur lors de la récupération des produits");
+        } else {
+            res.status(200).json(results);
+        }
+    });
+};
+
+exports.addProduct = (req, res) => {
+    const {product_name, product_description, price, category, image} = req.body;
+    connection.query(
+        "INSERT INTO produit (Libellé, Description, Images, Prix, Catégorie) VALUES (?, ?, ?, ?, ?)",
+        [product_name, product_description, image, price, category],
+        (err, results) => {
+            if (err) {
+                res.status(500).send("Erreur lors de l'ajout du produit");
+            } else {
+                res.status(200).send("Produit ajouté avec succès");
+            }
+        }
+    );
+};
+
+exports.deleteProduct = (req, res) => {
+    const productId = req.params.id;
+    connection.query(
+        "DELETE FROM produit WHERE ID = ?",
+        [productId],
+        (err, results) => {
+            if (err) {
+                res.status(500).json({success: false, message: "Erreur lors de la suppression du produit"});
+            } else {
+                res.status(200).json({success: true, message: "Produit supprimé avec succès"});
+            }
+        }
+    );
+};
+
+exports.getProductName = (req, res) => {
+    const {product_id} = req.body;
+    connection.query(
+        'SELECT Libellé FROM produit WHERE ID = ?',
+        [product_id],
+        (error, results) => {
+            if (error) {
+                res.status(500).json({error: "Erreur lors de la récupération du libelle"});
+            } else {
+                if (results.length > 0) {
+                    res.status(200).json({libelle: results[0].Libellé, success: true});
+                } else {
+                    res.status(404).json({error: "Utilisateur non trouvé"});
+                }
+            }
+        }
+    );
+};
+
+exports.getLibelle = (req, res) => {
+    const {product_id} = req.body;
+    console.log("Id produit", product_id);
+
+    connection.query(
+        'SELECT Libellé FROM produit WHERE ID = ?',
+        [product_id],
+        (error, results) => {
+            if (error) {
+                console.error("Erreur lors de la récupération du libelle:", error);
+                res.status(500).json({error: "Erreur lors de la récupération du libelle"});
+            } else {
+                if (results.length > 0) {
+                    console.log("Nom du produit récupéré avec succès :", results[0].Libellé);
+                    res.status(200).json({libelle: results[0].Libellé, success: true});
+                } else {
+                    console.error("Produit non trouvé");
+                    res.status(404).json({error: "Produit non trouvé"});
+                }
+            }
+        }
+    );
+};
