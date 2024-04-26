@@ -143,7 +143,7 @@
                                           <input type="hidden" name="quantity" value="1"> <!-- Par défaut, ajoute une quantité de 1 -->
                                           <input type="hidden" name="prix" value="<%= product.Prix %>">
 
-                                          <button type="submit" class="btn btn-primary">Ajouter au panier</button>
+                                          <button type="submit" class="btn btn-primary">+</button>
                                           <input type="hidden" name="_csrf" value=<%= csrfToken %>>
                                     </form>
                                     <a href="/product/<%= product.ID %>" class="btn btn-primary">Voir plus</a>

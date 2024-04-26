@@ -22,7 +22,7 @@ app.use(session({
   secret: '94+@&9miowi(chcx+xr%v)wa4p+yl20s$o-2)8h!3d+y0d(1!$',
   resave: false,
   saveUninitialized: true,
-  cookie: { maxAge: 60000  }, // Cookie expirera après 30 secondes
+  cookie: { maxAge: 60000 }, // Cookie expirera après 30 secondes
 }));
 
 //'img-src': ['data:', 'images.com'],
@@ -274,7 +274,7 @@ app.all("/login", async (req, res) => {
 
             // Inside the POST method for /login route
 
-             // Verifier si req.session.cart existe et si oui "transferer le panier"
+            // Verifier si req.session.cart existe et si oui "transferer le panier"
             if (req.session.cart && req.session.cart.length > 0) {
               req.session.cart.forEach(async function (element) {
                 try {
@@ -402,19 +402,59 @@ app.all("/products", upload.array("image", 10), (req, res) => {
 });
 app.get("/product/:id", async (req, res) => {
   const { id } = req.params;
-  const jwt = req.cookies.jwt;
-  try {
-    const productResponse = await axios.get(`http://localhost:5000/product/${id}`);
-    res.render('product.ejs', {
-      product: productResponse.data,
-      token: jwt,
-      nonce: req.nonce
+  const token = req.cookies.jwt;
 
-    });
-  } catch (error) {
-    // console.error(error);
-    res.status(500).send("An error occurred while fetching the product");
-  }
+  jwt.verify(token, 'secret', async (err, decoded) => {
+    if (err) {
+        // console.error("Erreur lors de la vérification du jeton JWT:", err);
+        // return res.status(401).json({ status: 'Erreur', message: 'Jeton inconnu' });
+      const productResponse = await axios.get(`http://localhost:5000/product/${id}`);
+      return res.render('product.ejs', {
+        product: productResponse.data,
+        token: token,
+        nonce: req.nonce,
+  
+      });
+    }
+
+    // Extraire le nom d'utilisateur du token décodé
+    const username = decoded.name;
+    // console.log("Nom d'utilisateur extrait du jeton JWT:", decoded);
+
+    // Effectuer une requête vers le backend pour récupérer l'ID de l'utilisateur
+    try {
+      const userResponse = await axios.get('http://localhost:5000/getUserID', {
+        params: {
+          username: username
+        }
+      });
+      const user_id = userResponse.data.user_id;
+      console.log("ID de l'utilisateur actuelle récupéré pour affichage produit:", user_id);
+
+      try {
+
+
+
+        const productResponse = await axios.get(`http://localhost:5000/product/${id}`);
+        res.render('product.ejs', {
+          product: productResponse.data,
+          token: token,
+          nonce: req.nonce,
+          user_id: user_id
+    
+        });
+      } catch (error) {
+        // console.error(error);
+        res.status(500).send("An error occurred while fetching the product");
+      }
+
+    } catch (error) {
+      console.error("Erreur lors de la récupération de l'ID de l'utilisateur:");
+
+    }
+  });
+
+
 });
 app.get("/categories", (req, res) => {
   // Demander à l'API les catégories et envoyer les données obtenues en réponse
@@ -542,6 +582,7 @@ app.get("/panier", async (req, res) => {
     res.status(401).json({ status: 'Erreur', message: 'Jeton inconnu' });
   }
 });
+
 
 
 // gestion des erreurs CSRF

@@ -11,13 +11,14 @@ app.use(express.json()); // Pour supporter les corps JSON
 
 app.use(
   cors({
-    origin: ["localhost:3000"], // Autoriser les requêtes de plusieurs origines
-    methods: ["GET", "POST", "DELETE"], // Types de requêtes autorisées
-    allowedHeaders: ["Content-Type", "Authorization"], // Headers autorisés
-    credentials: true, // Permettre ou non les cookies avec les requêtes
-    optionsSuccessStatus: 200, // Certains navigateurs (IE11, certains Chrome sous Android) utilisent HTTP 200 OK au lieu du statut 204
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE"], // Inclure la méthode DELETE
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+    optionsSuccessStatus: 200,
   })
 );
+
 
 // Connexion à MySQL
 const connection = mysql.createConnection({
@@ -301,6 +302,30 @@ app.get("/getPanier", async (req, res) => {
     res.status(500).send('Erreur lors de la récupération du panier');
   }
 });
+
+
+app.delete("/products/:id", (req, res) => {
+  const productId = req.params.id;
+  console.log("ID du produit à supprimer :", productId);
+  
+  // Logique de suppression du produit en base de données
+  connection.query(
+    "DELETE FROM produit WHERE ID = ?",
+    [productId],
+    (err, results) => {
+      if (err) {
+        console.error("Erreur lors de la suppression du produit :", err);
+        res.status(500).json({ success: false, message: "Erreur lors de la suppression du produit" });
+      } else {
+        console.log("Produit supprimé avec succès");
+        res.status(200).json({ success: true, message: "Produit supprimé avec succès" });
+      }
+    }
+  );
+});
+
+
+
 
 
 app.listen(5000, () => {
