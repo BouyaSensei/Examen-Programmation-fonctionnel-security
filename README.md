@@ -20,6 +20,10 @@ localhost:5000 -> serveur backend
 
 ### Fonctionnalités
 
+#### Documentation
+- La documentation backend est disponible à l'adresse : [localhost:5000/docs](http://localhost:5000/docs)
+- La documentation frontend est disponible à l'adresse : [localhost:3000/docs](http://localhost:3000/docs)
+
 #### Produits
 - [x] Affichage de la liste des produits
 - [x] Ajout d'un produit
