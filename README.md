@@ -13,16 +13,15 @@ Choisissez une option :
  2. Exécuter les serveurs
  3. Quitter
 ```
+
+## Documentations
+
+### [Documentation pour le backend](backend/README.md)
+### [Documentation pour le frontend](frontend/README.md)
+
 les serveurs sont lancés sur les ports 3000 et 5000
 
-localhost:3000 -> serveur frontend
-localhost:5000 -> serveur backend
-
 ### Fonctionnalités
-
-#### Documentation
-- La documentation backend est disponible à l'adresse : [localhost:5000/docs](http://localhost:5000/docs)
-- La documentation frontend est disponible à l'adresse : [localhost:3000/docs](http://localhost:3000/docs)
 
 #### Produits
 - [x] Affichage de la liste des produits

@@ -10,7 +10,28 @@ const productRoutes = require('./routes/productRoutes')
 const cartRoutes = require('./routes/cartRoutes')
 const categoriesRouter = require('./routes/categoriesRouter')
 const statsRoutes = require('./routes/statsRoutes')
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
+const options = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Express API avec Swagger',
+            version: '0.1.0',
+            description:
+                'Démonstration de la documentation de l\'API Express avec Swagger',
+        },
+        servers: [
+            {
+                url: 'http://localhost:5000',
+            },
+        ],
+    },
+    apis: ['./routes/*.js'],
+};
+
+const specs = swaggerJsdoc(options);
 app.use(express.json()); // Pour supporter les corps JSON
 
 app.use(
@@ -22,7 +43,7 @@ app.use(
         optionsSuccessStatus: 200,
     })
 );
-
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/', userRoutes);
 app.use('/', productRoutes);
 app.use('/', categoriesRouter);
@@ -143,8 +164,8 @@ app.get("/getPanier", async (req, res) => {
     }
 });
 
-//app.listen(5000, () => {
-  //  console.log("Serveur démarré sur http://localhost:5000");
-//});
+app.listen(5000, () => {
+    console.log("Serveur démarré sur http://localhost:5000");
+});
 
 module.exports = app;
