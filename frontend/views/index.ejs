@@ -128,33 +128,34 @@
             <div class="container mt-4" id="products">
                 <div class="row">
                     <% products.forEach(product => { %>
-                        <div class="col-md-4 mb-4">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title text-center mb-3"><%= product.Libellé %></h5>
-                                    <p class="card-text text-muted mb-3"><%= product.Description %></p>
-                                    <p class="card-text font-weight-bold mb-3"><%= product.Prix %> €</p>
-                                    <img src="http://localhost:3000/public/images/<%= product.Images %>"
-                                         alt="<%= product.Libellé %>" class="card-img-top mb-3">
-                                    <div class="mt-auto text-center">
-                                        <form action="http://localhost:3000/addToCart" method="POST" class="d-inline">
-                                            <% if(locals.user_id) { %>
-                                                <input type="hidden" name="user_id" value="<%= user_id %>">
-                                            <% } %>
-                                            <input type="hidden" name="product_id" value="<%= product.ID %>">
-                                            <input type="hidden" name="quantity" value="1">
-                                            <input type="hidden" name="prix" value="<%= product.Prix %>">
-                                            <input type="hidden" name="_csrf" value=<%= csrfToken %>>
-                                            <button type="submit" class="btn btn-primary btn-sm">Ajouter au panier
-                                            </button>
-                                        </form>
-                                        <a href="/product/<%= product.ID %>"
-                                           class="btn btn-outline-primary btn-sm ml-2">Voir plus</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    <% }) %>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title text-center mb-3"><%= product.Libellé %></h5>
+<p class="card-text text-muted mb-3">Description: <%= product.Description %></p>
+<p class="card-text font-weight-bold mb-3">Prix: <%= product.Prix %> €</p>
+                <% let images = product.Images.split(','); console.log(images); %>
+                <img src="http://localhost:3000/public/images/<%= images[0] %>"
+                     alt="<%= product.Libellé %>" class="card-img-top mb-3">
+                <div class="mt-auto text-center">
+                    <form action="http://localhost:3000/addToCart" method="POST" class="d-inline">
+                        <% if(locals.user_id) { %>
+                            <input type="hidden" name="user_id" value="<%= user_id %>">
+                        <% } %>
+                        <input type="hidden" name="product_id" value="<%= product.ID %>">
+                        <input type="hidden" name="quantity" value="1">
+                        <input type="hidden" name="prix" value="<%= product.Prix %>">
+                        <input type="hidden" name="_csrf" value=<%= csrfToken %>>
+                        <button type="submit" class="btn btn-primary btn-sm">Ajouter au panier
+                        </button>
+                    </form>
+                    <a href="/product/<%= product.ID %>"
+                       class="btn btn-outline-primary btn-sm ml-2">Voir plus</a>
+                </div>
+            </div>
+        </div>
+    </div>
+<% }) %>
                 </div>
             </div>
             <!-- Fin de l'affichage des produits -->

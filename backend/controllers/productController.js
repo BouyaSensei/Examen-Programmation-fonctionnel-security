@@ -75,11 +75,13 @@ exports.getAllProducts = (req, res) => {
 
 exports.addProduct = (req, res) => {
     const {product_name, product_description, price, category, image} = req.body;
+    const images = image.join(','); // Join the array into a string
     connection.query(
         "INSERT INTO produit (Libellé, Description, Images, Prix, Catégorie) VALUES (?, ?, ?, ?, ?)",
-        [product_name, product_description, image, price, category],
+        [product_name, product_description, images, price, category],
         (err, results) => {
             if (err) {
+                console.error(err); // Log the error
                 res.status(500).send("Erreur lors de l'ajout du produit");
             } else {
                 res.status(200).send("Produit ajouté avec succès");

@@ -4,10 +4,10 @@ const cartController = require('../controllers/cartController');
 
 /**
  * @swagger
+ *    tags:
+ *      - Panier
  * /addToCart:
  *   post:
- *     tags:
- *       - Panier
  *     summary: Add a product to the cart
  *     description: Adds a product to the user's shopping cart
  *     requestBody:
@@ -37,8 +37,6 @@ router.post('/addToCart', cartController.addToCart);
  * @swagger
  * /getCart:
  *   get:
- *     tags:
- *       - Panier
  *     summary: Get the cart content
  *     description: Retrieves the content of the user's shopping cart
  *     parameters:

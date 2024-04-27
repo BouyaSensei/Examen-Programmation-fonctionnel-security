@@ -15,25 +15,28 @@ const productController = {
 
     postProduct: (req, res) => {
         const {product_name, product_description, price, category} = req.body;
-        let imagePath = "default.png";
-        imagePath = req.files.map(file => file.path).join(', ');
         const csrfToken = req.cookies.csrfToken;
         if (csrfToken !== req.body._csrf) {
             res.status(403).send("Invalid CSRF token");
             return;
         }
+
+        // Extract the filenames from req.files
+        const filenames = req.files.map(file => file.originalname);
+
         axios.post("http://localhost:5000/products", {
             product_name,
             product_description,
             price,
             category,
-            image: imagePath,
+            image: filenames, // Send an array of filenames
         })
             .then((response) => {
                 res.cookie("toast", {type: "add-success", message: "Produit ajouter  avec succes !"}, {httpOnly: true});
                 res.redirect("/");
             })
             .catch((err) => {
+                console.error(err); // Log the error
                 res.status(500).send("Erreur lors de l'ajout du produit");
             });
     },

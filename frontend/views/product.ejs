@@ -35,8 +35,11 @@
 <section id="product-details" class="container mt-5">
     <div class="row">
         <div class="col-lg-6">
-            <img src="/public/images/<%= product.Images %>" alt="<%= product.Libellé %>"
-                 class="img-fluid rounded mb-10">
+            <% let images = product.Images.split(','); %>
+            <% images.forEach(image => { %>
+                <img src="http://localhost:3000/public/images/<%= image %>" alt="<%= product.Libellé %>"
+                     class="img-fluid rounded mb-10">
+            <% }) %>
         </div>
         <div class="col-lg-6">
             <h2 class="display-5 mb-3">
