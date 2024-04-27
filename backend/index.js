@@ -143,6 +143,8 @@ app.get("/getPanier", async (req, res) => {
     }
 });
 
-app.listen(5000, () => {
-    console.log("Serveur démarré sur http://localhost:5000");
-});
+//app.listen(5000, () => {
+  //  console.log("Serveur démarré sur http://localhost:5000");
+//});
+
+module.exports = app;
