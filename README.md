@@ -2,7 +2,16 @@
 
 ## Utilisation
 
-### Installation
+Il faudra renseigner un fichier .env à la racine du dossier [backend](backend/) avec les informations suivantes :
+
+```bash
+DB_HOST=localhost
+DB_USER=root
+DB_PASS=
+DB_NAME=store
+```
+
+## Installation
 
 ```bash
 # Un menu va apparaitre pour installer / executer le projet
