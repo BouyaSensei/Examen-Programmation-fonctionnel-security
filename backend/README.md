@@ -4,7 +4,7 @@ Pour la partie backend du projet, nous avons utilisé Node.js et Express.js pour
 
 On a utilisé Swagger pour la documentation de l'API.
 
-l'url de la documentation est : [http://localhost:5000/api](http://localhost:5000/api)
+l'url de la documentation est : [http://localhost:5000/docs](http://localhost:5000/docs)
 
 ## Architecture
 
