@@ -9,4 +9,12 @@ module.exports = {
     filename: 'final.js',
   },
   target: 'node',
+  module: {
+    rules: [
+      {
+        test: /\.ejs$/,
+        use: ['ejs-compiled-loader'],
+      },
+    ],
+  },
 };

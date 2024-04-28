@@ -26,13 +26,30 @@ Choisissez une option :
 ## Documentations
 
 ### [Documentation pour le backend](backend/README.md)
+
 ### [Documentation pour le frontend](frontend/README.md)
 
 les serveurs sont lancés sur les ports 3000 et 5000
 
 ### Fonctionnalités
 
+### Webpack
+
+Utilisation de Webpack pour la compilation du code et la minification du code.
+
+ ```bash
+# Compilation du code
+npm run build
+
+# exécution du serveur
+npm run prod
+```
+
+- [x] Compilation du code
+- [x] Minification du code
+
 #### Produits
+
 - [x] Affichage de la liste des produits
 - [x] Ajout d'un produit
 - [x] Suppression d'un produit
@@ -40,15 +57,18 @@ les serveurs sont lancés sur les ports 3000 et 5000
 - [x] Filtrage des produits
 
 #### Panier
+
 - [x] Affichage du panier
 - [x] Ajout d'un produit au panier
 
 #### Authentification
+
 - [x] Connexion
 - [x] Inscription
 - [x] Déconnexion
 
 #### Sécurité
+
 - [x] CRSF
 - [x] JWT
 - [x] Chiffrement des mots de passe
