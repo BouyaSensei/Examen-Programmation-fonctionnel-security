@@ -7,29 +7,39 @@ L'architecture du projet frontend est la suivante :
 ```
 frontend/
 ├── public/
-│ ├── index.html
-│ ├── favicon.ico
-│ └── manifest.json
-├── src/
-│ ├── features/
-│ │ ├── Product/
-│ │ │ ├── ProductList.js
-│ │ │ ├── ProductItem.js
-│ │ │ └── products.js
-│ │ ├── Cart/
-│ │ │ ├── Cart.js
-│ │ │ └── cart.js
-│ │ ├── User/
-│ │ │ ├── User.js
-│ │ │ └── styles.css
-│ │ └── Auth/
-│ │ ├── Auth.js
-│ │ └── auth.js
-│ ├── App.js
-│ └── index.js
-├── styles/
-│ └── main.css
-├── package.json 
+│   ├── images
+├── dist/
+├── controllers/
+│   ├── authController.js
+│   ├── cartController.js
+│   ├── productController.js
+│   ├── categoryController.js
+│   ├── dashboardController.js
+│   ├── homeController.js
+│   ├── statsController.js
+├── middleewares
+│   ├── crsfErrorMiddleware.js
+├── routes/
+│   ├── authRoutes.js
+│   ├── cartRoutes.js
+│   ├── productRoutes.js
+│   ├── categoryRoutes.js
+│   ├── dashboardRoutes.js
+│   ├── homeRoutes.js
+│   ├── statsRoutes.js
+├── views/
+│   ├── components/
+│   │   └── navbar.ejs
+│   ├── addProduct.ejs
+│   ├── dashboard.ejs
+│   ├── index.ejs
+│   ├── login.ejs
+│   ├── register.ejs
+│   ├── panier.ejs
+│   └── product.ejs
+├── index.js
+├── package.json
+├── webpack.config.js
 └── README.md
 
 ```
